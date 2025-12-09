@@ -1,0 +1,214 @@
+/* --- 1. Basic Reset and Global Styles --- */
+
+/* Reset browser defaults for better consistency */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9; /* Light grey background */
+    color: #333; /* Dark text */
+}
+
+/* Base styles for anchors and lists */
+a {
+    text-decoration: none;
+    color: #007bff; /* Standard blue link color */
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Global button styles */
+button, .button {
+    background-color: #ff6f61; /* JoyKart accent color (a warm red/coral) */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+button:hover, .button:hover {
+    background-color: #e55c50;
+    transform: translateY(-1px);
+}
+
+/* --- 2. Header and Navigation --- */
+
+header {
+    background-color: #ffffff;
+    padding: 15px 30px;
+    display: flex; /* Use Flexbox for layout */
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    color: #ff6f61; /* Match the main button color */
+    margin: 0;
+}
+
+/* Main Navigation */
+header nav ul {
+    display: flex;
+    gap: 20px;
+}
+
+header nav a {
+    color: #333;
+    font-weight: 500;
+}
+
+/* Search and Utility Bar */
+header > div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+header input[type="search"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+
+/* --- 3. Main Content Layout --- */
+
+main {
+    padding: 20px;
+    max-width: 1200px; /* Center the main content */
+    margin: 0 auto;
+}
+
+section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --- 4. Hero Section --- */
+
+#hero {
+    background-color: #ffe6e6; /* Light pink/coral background */
+    text-align: center;
+    padding: 60px 20px;
+    border-radius: 10px;
+    margin-top: 0;
+}
+
+#hero h2 {
+    font-size: 2.5em;
+    color: #ff6f61;
+    margin-bottom: 10px;
+}
+
+#hero p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+/* --- 5. Featured Products --- */
+
+#featured-products h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#featured-products {
+    display: grid; /* Use CSS Grid for the product layout */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    text-align: center;
+}
+
+.product-card {
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover; /* Ensures image covers the area without distortion */
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.product-card h3 {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.product-card p {
+    font-weight: bold;
+    color: #28a745; /* Green for price */
+    margin-bottom: 15px;
+}
+
+/* --- 6. Promotion Section --- */
+
+#promotion {
+    background-color: #343a40; /* Dark background for contrast */
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#promotion h2 {
+    color: #ffc107; /* Bright yellow for emphasis */
+}
+
+#promotion a {
+    color: white;
+    background-color: #007bff;
+}
+
+/* --- 7. Footer --- */
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+footer nav ul {
+    justify-content: center;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+footer a {
+    color: #ccc;
+}
+
+footer a:hover {
+    color: #fff;
+}
+
+footer p {
+    font-size: 0.9em;
+    margin-top: 10px;
+}

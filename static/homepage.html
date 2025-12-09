@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoyKart - Your Ultimate Shopping Destination</title>
+    <link  rel = "stylesheet"  href= "static/styles.css">
+    </head>
+<body>
+
+    <header>
+        <h1>JoyKart</h1>
+        
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop All</a></li>
+                <li><a href="categories.html">Categories</a></li>
+                <li><a href="contact.html">Contact Us</a></li>
+            </ul>
+        </nav>
+
+        <div>
+            <input type="search" placeholder="Search JoyKart...">
+            <button>Search</button>
+            <a href="static/login.html">Login</a>
+        </div>
+    </header>
+
+    <main>
+        
+        <section id="hero">
+            <h2>Welcome to JoyKart!</h2>
+            <p>Find joy in every purchase. Explore our latest collections.</p>
+            <a href="products.html" class="button">Shop Now</a>
+        </section>
+
+        <section id="featured-products">
+            <h2>✨ Featured Products</h2>
+            
+            <div class="product-card">
+                <img src="static\img\placeholder1.jpg" alt="Product Name 1">
+                <h3>Amazing Gadget</h3>
+                <p>$49.99</p>
+                <button>Add to Cart</button>
+            </div>
+            
+            <div class="product-card">
+                <img src="static\img\placeholder2.jpg" alt="Product Name 2">
+                <h3>Stylish Apparel</h3>
+                <p>$29.99</p>
+                <button>Add to Cart</button>
+            </div>
+
+            </section>
+
+        <section id="promotion">
+            <h2>🎁 Limited Time Offer!</h2>
+            <p>Get 20% off all electronics until the end of the month.</p>
+            <a href="electronics.html">View Deals</a>
+        </section>
+
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                <li><a href="about.html">About JoyKart</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="shipping.html">Shipping & Returns</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+            </ul>
+        </nav>
+        
+        <p>&copy; <span id="current-year">2025</span> JoyKart. All rights reserved.</p>
+        
+        <div>
+            <a href="#">Facebook</a> |
+            <a href="#">Instagram</a> |
+            <a href="#">Twitter</a>
+        </div>
+    </footer>
+
+    <script>
+        // Simple JavaScript to auto-update the copyright year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+
+</body>
+</html>
