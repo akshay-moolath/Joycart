@@ -27,3 +27,6 @@ def home():
 @app.get('/checkout')
 def checkout():
     return FileResponse("templates/checkout.html")
+@app.get("/favicon.ico")#added to remove favicon error
+def favicon():
+    return ""
