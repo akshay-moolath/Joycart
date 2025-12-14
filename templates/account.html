@@ -1,0 +1,114 @@
+<script>
+  function isTokenExpired(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp <= now;
+    } catch {
+      return true;
+    }
+  }
+
+  const token = localStorage.getItem("access_token");
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("access_token");
+    window.location.replace("/login");
+  }
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Account</title>
+
+  <!-- reuse same CSS -->
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- HEADER (reuse from dashboard, keep it same) -->
+<header>
+
+			<!-- MAIN HEADER -->
+			<div id="header">
+				<!-- container -->
+				<div class="container">
+					<!-- row -->
+					<div class="row">
+						<!-- LOGO -->
+						<div class="col-md-3">
+							<div class="header-logo">
+								<a href="#" class="logo">
+									<img src="static/img/logo.png" alt="">
+								</a>
+							</div>
+						</div>
+						<!-- /LOGO -->
+
+						<!-- SEARCH BAR -->
+						<div class="col-md-6">
+							<div class="header-search">
+								<form>
+									<select class="input-select">
+										<option value="0">All Categories</option>
+										<option value="1">Category 01</option>
+										<option value="1">Category 02</option>
+									</select>
+									<input class="input" placeholder="Search here">
+									<button class="search-btn">Search</button>
+								</form>
+							</div>
+						</div>
+                    <div class="col-md-3 clearfix">
+							<div class="header-ctn">
+								<!-- Wishlist -->
+								<button class="btn-ghost" id="logout">Logout</button></header>
+						<!-- /SEARCH BAR -->
+
+						<!-- ACCOUNT -->
+						
+
+<!-- ACCOUNT SECTION -->
+<div class="section">
+  <div class="container">
+    <div class="row">
+
+      <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">My Account</h3>
+          </div>
+
+          <div class="panel-body">
+            <p><strong>Username:</strong> <span id="username"></span></p>
+            <p><strong>Email:</strong> <span id="email"></span></p>
+
+            
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // TEMP data (replace later with backend fetch)
+  document.getElementById("username").innerText =
+    localStorage.getItem("username") || "User";
+
+  document.getElementById("email").innerText =
+    localStorage.getItem("email") || "user@example.com";
+
+  document.getElementById("logout").onclick = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    window.location.href = "/";
+  };
+</script>
+
+</body>
+</html>

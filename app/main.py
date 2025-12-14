@@ -31,6 +31,13 @@ def checkout():
 @app.get('/product')
 def product():
     return FileResponse("templates/product.html")
+@app.get('/hotdeals')
+def hotdeals():
+    return FileResponse("templates/hotdeals.html")
+@app.get('/account')
+def hotdeals():
+    return FileResponse("templates/account.html")
+
 @app.get("/favicon.ico")#added to remove favicon error
 def favicon():
     return ""
