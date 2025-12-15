@@ -1,4 +1,5 @@
 <script>
+
 function isTokenExpired(token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -16,6 +17,7 @@ function isTokenExpired(token) {
     localStorage.removeItem("access_token");
     window.location.replace("/login");
   }
+
 </script>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,16 +58,6 @@ function isTokenExpired(token) {
     </head>
 	<body>
 		<header>
-			<!-- TOP HEADER -->
-			<div id="top-header">
-				<div class="container">
-					
-					<ul class="header-links pull-right">
-						
-						<li><a href="/account"><i class="fa fa-user-o"></i> My Account</a></li>
-					</ul>
-				</div>
-			</div>
 			<!-- MAIN HEADER -->
 			<div id="header">
 				<!-- container -->
@@ -101,76 +93,24 @@ function isTokenExpired(token) {
 						<!-- ACCOUNT -->
 						<div class="col-md-3 clearfix">
 							<div class="header-ctn">
-								
-								<button class="btn-ghost" id="logout">Logout</button>
-						
-								
-								<!-- Cart -->
-								<div class="dropdown">
-									
-									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-										<i class="fa fa-shopping-cart"></i>
-										<span>Your Cart</span>
-										<div class="qty">3</div>
-										</a>
-									<a href="/account" class="account-link">
+								<div>
+								<a href="/account">
 										<i class="fa fa-user"></i>
 										<span>My Account</span></a>
-									<div class="cart-dropdown">
-										<div class="cart-list">
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="static/img/product01.png" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">product name goes here</a></h3>
-													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="static/img/product02.png" alt=""> 
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">product name goes here</a></h3>
-													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-										</div>
-										<div class="cart-summary">
-											<small>3 Item(s) selected</small>
-											<h5>SUBTOTAL: $2940.00</h5>
-										</div>
-										<div class="cart-btns">
-											<a href="#">View Cart</a>
-											<a href="/checkout">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
-										</div>
 									</div>
-								</div>
-								<!-- /Cart -->
+									<div>
+											<a href="/checkout">
+												<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+											<span>View Cart</span></a>
+										</div>
+								<div >
+									<a href="#" id="logout">
+										<i class="fa fa-sign-out" aria-hidden="true"></i>
 
-								<!-- Menu Toogle -->
-								<div class="menu-toggle">
-									<a href="#">
-										<i class="fa fa-bars"></i>
-										<span>Menu</span>
-									</a>
+										<span>Log Out</span></a>
 								</div>
-								<!-- /Menu Toogle -->
-							</div>
-						</div>
-						<!-- /ACCOUNT -->
-					</div>
-					<!-- row -->
-				</div>
-				<!-- container -->
-			</div>
-			<!-- /MAIN HEADER -->
-		</header>
-		<!-- /HEADER -->
+								</div>
+								</header>
 
 		<!-- NAVIGATION -->
 		<nav id="navigation">
@@ -1099,18 +1039,7 @@ function isTokenExpired(token) {
 			<!-- /bottom footer -->
 		</footer>
 		<!-- /FOOTER -->
-    <script>
-	
-
-	const logoutBtn = document.getElementById('logout');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('username');
-      localStorage.removeItem('access_token');
-      window.location.href = '/';
-    });
-  }
-    </script>
+ 
 		<!-- jQuery Plugins -->
 		<script src="/static/js/jquery.min.js"></script>
 		<script src="/static/js/bootstrap.min.js"></script>
@@ -1119,5 +1048,18 @@ function isTokenExpired(token) {
 		<script src="/static/js/jquery.zoom.min.js"></script>
 		<script src="/static/js/main.js"></script>
     	<script src="/static/js/dashboard.js"></script>
+		
+
+		  <script>
+    const logoutBtn = document.getElementById('logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.replace('/');
+      });
+    }
+  </script>
+
 	</body>
 </html>
