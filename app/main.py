@@ -40,9 +40,6 @@ def dashboard():
 @app.get('/checkout')
 def checkout():
     return FileResponse("templates/checkout.html")
-@app.get('/product/{product_id}')
-def product():
-    return FileResponse("templates/product.html)")
 @app.get('/hotdeals')
 def hotdeals():
     return FileResponse("templates/hotdeals.html")
