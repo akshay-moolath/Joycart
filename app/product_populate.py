@@ -32,9 +32,8 @@ def populate_products():
             return_policy=item.get("returnPolicy"),
 
             thumbnail=item.get("thumbnail"),
+            images = item.get("images")
 
-            # store images list as JSON string
-            images=json.dumps(item.get("images", []))
         )
 
         db.add(product)

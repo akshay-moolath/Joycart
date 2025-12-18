@@ -32,6 +32,72 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
+class ProductCreate(BaseModel): 
+    title : str
+    description : str
+    category : str
+    price : float
+    discount_percentage : float
+    stock :int
+    brand : str
+    weight : int
+    warranty : str
+    availability : str
+    return_policy : str
+    thumbnail : str
+    images : list[str]
+
+class ProductOut(BaseModel):
+
+    id : int
+    title : str
+    description : str
+    category : str
+    price : float
+    discount_percentage : float
+    rating : float
+    stock :int
+    brand : str
+    sku : str
+    weight : int
+    warranty : str
+    shipping_info:str
+    availability : str
+    return_policy : str
+    thumbnail : str
+    images : list[str] 
+
+class Cart(BaseModel):
+    id:int
+    user_id:int
+    created_at:datetime
+    updated_at:datetime
+
+
+class CartAdd(BaseModel):
+    product_id: int
+    quantity: int = 1
+
+class CartItems(BaseModel):
+    id:int
+    cart_id:int
+    product_id:int
+    quantity:int
+
+class CartItemOut(BaseModel):
+    product_id: int
+    quantity: int
+
+    class Config:
+        orm_attributes = True
+class CartOut(BaseModel):
+    id: int
+    items: list[CartItemOut]
+
+    class Config:
+        orm_attributes = True
+
+
 
 class OrderCreate(BaseModel):
     amount:float
@@ -68,53 +134,6 @@ class PaymentOut(BaseModel):
     created_at:datetime
     class Config:
         orm_attributes = True
-
-class Cart(BaseModel):
-    id:int
-    user_id:int
-    created_at:datetime
-    updated_at:datetime
-class CartItems(BaseModel):
-    id:int
-    cart_id:int
-    product_id:int
-    quantity:int
-
-
-
-class ProductCreate(BaseModel): 
-    title : str
-    description : str
-    category : str
-    price : float
-    discount_percentage : float
-    stock :int
-    brand : str
-    weight : int
-    warranty : str
-    availability : str
-    return_policy : str
-    thumbnail : str
-    images : str 
-
-class ProductOut(BaseModel):
-
-    id : int
-    title : str
-    description : str
-    category : str
-    price : float
-    discount_percentage : float
-    rating : float
-    stock :int
-    brand : str
-    sku : str
-    weight : int
-    warranty : str
-    availability : str
-    return_policy : str
-    thumbnail : str
-    images : str 
 
 class ReviewCreate(BaseModel):
     rating:float

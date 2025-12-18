@@ -7,6 +7,8 @@ from app.auth import get_current_user
 from app.db import Base, engine
 from app.user import router as user_router
 from app.seller import router as seller_router
+from app.cart import router as cart_router
+
 
 Base.metadata.create_all(bind = engine)
 
@@ -14,6 +16,7 @@ app = FastAPI()
 app.mount('/static',  StaticFiles(directory='static'), name = 'static')
 app.include_router(user_router, prefix="/api")
 app.include_router(seller_router,prefix="/api")
+app.include_router(cart_router, prefix="/api")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -42,10 +45,14 @@ def hotdeals():
 @app.get('/account')
 def hotdeals():
     return FileResponse("templates/account.html")
+@app.get("/favicon.ico")#added to remove favicon error
+def favicon():
+    return ""
+
+
+
+
 @app.get('/product/{product_id}')
 def product():
     return FileResponse("templates/product.html)")
 
-@app.get("/favicon.ico")#added to remove favicon error
-def favicon():
-    return ""
