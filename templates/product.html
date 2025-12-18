@@ -1,3 +1,24 @@
+<script>
+
+function isTokenExpired(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp <= now;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  const token = localStorage.getItem("access_token");
+
+  if (!token || isTokenExpired(token)) {
+    console.log("No token or expired token → redirecting");
+    localStorage.removeItem("access_token");
+    window.location.replace("/login");
+  }
+
+</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -174,6 +195,6 @@
 {% endif %}
 
 </div>
-
+<script src = '/static/js/product.js'></script>
 </body>
 </html>
