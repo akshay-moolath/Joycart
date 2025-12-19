@@ -79,7 +79,7 @@ class CartAdd(BaseModel):
     product_id: int
     quantity: int = 1
 
-class CartItems(BaseModel):
+class CartItem(BaseModel):
     id:int
     cart_id:int
     product_id:int

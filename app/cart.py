@@ -50,3 +50,31 @@ def add_to_cart(
     db.refresh(cart)
 
     return cart
+
+
+@router.patch("/item/{item_id}")
+def update_quantity(
+    item_id: int,
+    quantity: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    item = (
+    db.query(CartItem)
+    .join(Cart)
+    .filter(
+        CartItem.id == item_id,
+        Cart.user_id == current_user.id
+    )
+    .first()
+)
+
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.quantity = quantity
+    db.commit()
+
+    return {"message": "Quantity updated"}
+

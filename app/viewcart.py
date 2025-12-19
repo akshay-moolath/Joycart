@@ -30,6 +30,7 @@ def get_cart(
         total += subtotal
 
         items.append({
+            "id": item.id,
             "product_id": product.id,
             "title": product.title,
             "price": product.price,

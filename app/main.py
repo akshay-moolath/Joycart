@@ -7,7 +7,7 @@ from app.auth import get_current_user
 from app.db import Base, engine
 from app.user import router as user_router
 from app.seller import router as seller_router
-from app.addtocart import router as addtocart_router
+from app.cart import router as cart_router
 from app.viewcart import router as viewcart_router
 from app.product_page import router as product_page_router
 
@@ -17,7 +17,7 @@ app = FastAPI()
 app.mount('/static',  StaticFiles(directory='static'), name = 'static')
 app.include_router(user_router, prefix="/api")
 app.include_router(seller_router,prefix="/api")
-app.include_router(addtocart_router,prefix="/api/cart")
+app.include_router(cart_router,prefix="/api/cart")
 app.include_router(viewcart_router,prefix='/api/cart')
 app.include_router(product_page_router)
 
