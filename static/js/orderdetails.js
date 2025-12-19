@@ -32,6 +32,18 @@ async function loadOrder() {
             </div>
         `;
     });
+if (order.status === "PENDING") {
+        container.innerHTML += `
+            <hr>
+            <button onclick="goToCheckout(${order.id})">
+                Proceed to Checkout
+            </button>
+        `;
+    }
+}
+
+function goToCheckout(orderId) {
+    window.location.href = `/checkout/${orderId}`;
 }
 
 loadOrder();

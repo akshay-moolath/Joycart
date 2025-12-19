@@ -12,6 +12,7 @@ from app.viewcart import router as viewcart_router
 from app.product_page import router as product_page_router
 from app.checkout import router as checkout_router
 from app.orders import router as order_router
+from app.payments import router as payment_router
 
 Base.metadata.create_all(bind = engine)
 
@@ -24,6 +25,7 @@ app.include_router(viewcart_router,prefix='/api/cart')
 app.include_router(product_page_router)
 app.include_router(checkout_router,prefix="/api")
 app.include_router(order_router,prefix="/api/orders")
+app.include_router(payment_router,prefix="/api/payments")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -40,8 +42,8 @@ def register():
 @app.get('/dashboard')
 def dashboard():
     return FileResponse("templates/dashboard.html")
-@app.get('/checkout')
-def checkout():
+@app.get("/checkout/{order_id}")
+def checkout_page(order_id: int):
     return FileResponse("templates/checkout.html")
 @app.get('/hotdeals')
 def hotdeals():
