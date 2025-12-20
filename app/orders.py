@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from app.db import get_db
 from app.auth import get_current_user
 from app.models import Order, OrderItems, Product,Payment
+import uuid
 
 router = APIRouter()
 
@@ -73,12 +73,26 @@ def get_order_details(
             for oi, product in items
         ]
     }
-    if order.status=="PAID":
+    if order.status == "PAID":
         payment = (
         db.query(Payment)
         .filter(Payment.order_id == order.id)
         .first())
         data["payment"]=payment.gateway_payment_id
+    if order.status == "REFUNDED":
+            payment = (
+            db.query(Payment)
+            .filter(
+                Payment.order_id == order.id,
+                Payment.status == "refund"
+            )
+            .order_by(Payment.created_at.desc())
+            .first()
+        )
+
+            data["payment"] = payment.gateway_payment_id if payment else None
+
+
     return data
 
 @router.post("/{order_id}/cancel")
@@ -114,9 +128,24 @@ def refund_order(order_id: int, db: Session = Depends(get_db)):
             status_code=400,
             detail="Only paid orders can be refunded"
         )
+    items = db.query(OrderItems).filter(OrderItems.order_id == order.id).all()
 
+    for item in items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        product.stock += item.quantity
+
+    refund_payment = Payment(
+        order_id=order.id,
+        amount=-order.amount, 
+        status="refund",
+        gateway="mock",
+        gateway_payment_id=f"REFUND-{uuid.uuid4().hex[:12]}"
+    )
+
+    db.add(refund_payment)
     order.status = "REFUNDED"
     db.commit()
+    
 
     return {
         "message": "Order refunded",

@@ -18,6 +18,7 @@ async function loadOrder() {
     container.innerHTML = `
         <p><b>Order ID:</b> ${order.id}</p>
         <p><b>Status:</b> ${order.status}</p>
+
         <hr>
     `;
 
@@ -42,7 +43,7 @@ if (order.status === "PENDING") {
             </button>
         `;
     }
-if (order.status === "PAID") {
+else if (order.status === "PAID") {
         container.innerHTML += `
             <hr>
             <p><b>Payment ID:</b> ${order.payment}</p>
@@ -50,6 +51,12 @@ if (order.status === "PAID") {
                 Request Refund
             </button>
             
+        `;
+    }
+else if (order.status === "REFUNDED"){
+        container.innerHTML += `
+        <hr>
+        <p><b>Refund ID:</b> ${order.payment}</p>
         `;
     }
 }
