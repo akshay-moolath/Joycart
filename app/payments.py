@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 from app.db import get_db
 from app.models import Order,OrderItems,Product,Payment
+import uuid
+
 
 router = APIRouter()
 
@@ -33,7 +35,7 @@ def payment(order_id: int, db: Session = Depends(get_db)):
         amount=order.amount,
         status="success",
         gateway="mock",
-        gateway_payment_id=None
+        gateway_payment_id= f"MOCK-{uuid.uuid4().hex[:12]}"
     )
 
     db.add(payment)

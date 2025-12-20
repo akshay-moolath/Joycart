@@ -78,7 +78,7 @@ def get_order_details(
         db.query(Payment)
         .filter(Payment.order_id == order.id)
         .first())
-        data["payment"]=payment.id
+        data["payment"]=payment.gateway_payment_id
     return data
 
 @router.post("/{order_id}/cancel")
