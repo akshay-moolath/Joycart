@@ -96,3 +96,24 @@ def cancel_order(order_id: int, db: Session = Depends(get_db)):
         "order_id": order.id,
         "status": order.status
     }
+@router.post("/{order_id}/refund")
+def refund_order(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.status != "PAID":
+        raise HTTPException(
+            status_code=400,
+            detail="Only paid orders can be refunded"
+        )
+
+    order.status = "REFUNDED"
+    db.commit()
+
+    return {
+        "message": "Order refunded",
+        "order_id": order.id,
+        "status": order.status
+    }

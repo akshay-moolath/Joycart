@@ -43,6 +43,15 @@ if (order.status === "PENDING") {
             </button>
         `;
     }
+if (order.status === "PAID") {
+        container.innerHTML += `
+            <hr>
+            <button onclick="Refund(${order.id})">
+                Request Refund
+            </button>
+            
+        `;
+    }
 }
 
 function goToCheckout(orderId) {
@@ -72,6 +81,34 @@ async function cancelOrder(orderId) {
     }
 
     alert("Order cancelled successfully");
+
+    window.location.reload();
+
+}
+async function Refund(orderId) {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        window.location.href = "/login";
+        return;
+    }
+
+    const confirmCancel = confirm("Are you sure you want to request refund for this order?");
+    if (!confirmCancel) return;
+
+    const res = await fetch(`/api/orders/${orderId}/refund`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.detail || "Unable to provide refund ");
+        return;
+    }
+
+    alert("Successfully Refunded");
 
     window.location.reload();
 
