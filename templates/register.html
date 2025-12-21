@@ -1,66 +1,31 @@
-<script>
-    function isTokenValid(token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const now = Math.floor(Date.now() / 1000);
-      return payload.exp && payload.exp > now;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  const token = localStorage.getItem("access_token");
-
-  if (token && isTokenValid(token)) {
-    // logged in & token not expired
-    if (location.pathname !== "/dashboard") {
-      window.location.replace("/dashboard");
-    }
-  } else {
-    // token missing or expired → clean it
-    localStorage.removeItem("access_token");
-  }
-</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Joycart Register</title>
-    <link rel = 'stylesheet' href=" static/css/login-register.css">
 </head>
 <body>
-    <div class="card">
         <h1>Create your account</h1>
-        <p class="lead">Shop at lowest price!!</p>
-
-        <form id="register-form" autocomplete="off">
-            <div class="flex-wrapper"> 
+        <form action="/api/register" method="POST">
                 <div>
                     <label for="username">Username</label>
-                    <input id="username" name="username_reg" placeholder="Enter your username" autocomplete="off"/>
+                    <input id="username" name="username" placeholder="Enter your username" autocomplete="off"/>
                 </div>
                 <div>
                     <label for="email">Email</label>
-                    <input id="email" name="email_reg" placeholder="Enter your email" autocomplete="off"/>
+                    <input id="email" name="email" placeholder="Enter your email" autocomplete="off"/>
                 </div>
 
                 <div>
                     <label for="password">Password</label>
-                    <input id="password" name="password_reg" type="password" placeholder="••••••••" autocomplete="new-password"/>
+                    <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password"/>
                 </div>
 
-                <button class="primary-button" type="submit">Register</button>
-            </div>
-
-            <div class="footer">
+                <button type="submit">Register</button>
+                </form>
                 Already have an account?
                 <a href="/login">Login</a>
             </div>
-
-            <div id="msg"></div>
-        </form>
-    </div>
-    <script src="/static/js/register.js"></script>
 </body>
 </html>

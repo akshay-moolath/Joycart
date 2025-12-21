@@ -9,23 +9,47 @@ from app.schemas import UserCreate, UserOut
 
 router = APIRouter()
 
-@router.post("/users", response_model=UserOut)
-def create_user(payload: UserCreate, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.username == payload.username).first():
+@router.post("/register") #for html redirect
+def create_user(
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    if db.query(User).filter(User.username == username).first():
+        return RedirectResponse("/register?error=username", status_code=302)
+
+    if db.query(User).filter(User.email == email).first():
+        return RedirectResponse("/register?error=email", status_code=302)
+
+    user = User(
+        username=username,
+        email=email,
+        password=hash_password(password)
+    )
+
+    db.add(user)
+    db.commit()
+
+    return RedirectResponse("/login", status_code=302)
+
+@router.post("/registerjs", response_model=UserOut) # for front end when using js,route url can be same ,because only first one works,but for safety name differently
+def create_user(username: str = Form(...),email:str = Form(...),
+    password: str = Form(...), db: Session = Depends(get_db)):
+    if db.query(User).filter(User.username == username).first():
         raise HTTPException(status_code=400, detail="username already exists")
-    if db.query(User).filter(User.email == payload.email).first():
+    if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="email already exists")
 
     user = User(
-        username=payload.username,
-        email=payload.email,
-        password=hash_password(payload.password)
+        username=username,
+        email=email,
+        password=hash_password(password)
     )
     db.add(user)
     db.commit()
     db.refresh(user)
     return user
-
 
 
 @router.post("/login")
