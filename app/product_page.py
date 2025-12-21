@@ -8,7 +8,7 @@ from app.models import Product
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/product/{product_id}")
+@router.get("/products/{product_id}")
 def product_page(
     request: Request,
     product_id: int,
