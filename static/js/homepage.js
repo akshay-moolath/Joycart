@@ -12,7 +12,7 @@ products.forEach(p => {
             <img src="${p.thumbnail}" alt="${p.title}">
             <h4>${p.title}</h4>
             <div class="price">₹${p.price}</div>
-            <a href="/product/${p.id}">View</a>
+            <a href="/products/${p.id}">View</a>
         </div>
     `;
 });

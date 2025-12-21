@@ -13,7 +13,7 @@ def get_products(db: Session = Depends(get_db)):
 
 
 @router.get("/page")#for html
-def list_products(db: Session = Depends(get_db)):
+def list_products(db: Session = Depends(get_db)): ####order matters,fast api reads top to bottom ####
     products = db.query(Product).all()
 
     return [
