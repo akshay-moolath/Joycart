@@ -15,6 +15,7 @@ def product_page(
     db: Session = Depends(get_db)
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
+    
     if not product:
         return templates.TemplateResponse(
         "404.html",

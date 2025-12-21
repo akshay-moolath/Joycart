@@ -96,7 +96,7 @@ def get_order_details(
     return data
 
 @router.post("/{order_id}/cancel")
-def cancel_order(order_id: int, db: Session = Depends(get_db)):
+def cancel_order(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:
@@ -117,7 +117,7 @@ def cancel_order(order_id: int, db: Session = Depends(get_db)):
         "status": order.status
     }
 @router.post("/{order_id}/refund")
-def refund_order(order_id: int, db: Session = Depends(get_db)):
+def refund_order(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:

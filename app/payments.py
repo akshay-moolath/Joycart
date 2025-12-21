@@ -4,12 +4,13 @@ from fastapi import Depends
 from app.db import get_db
 from app.models import Order,OrderItems,Product,Payment
 import uuid
+from app.auth import get_current_user
 
 
 router = APIRouter()
 
 @router.post("")
-def payment(order_id: int, db: Session = Depends(get_db)):
+def payment(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:
@@ -51,7 +52,7 @@ def payment(order_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/success/{order_id}")
-def payment_success(order_id: int, db: Session = Depends(get_db)):
+def payment_success(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:

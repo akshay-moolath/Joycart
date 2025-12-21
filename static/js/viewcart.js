@@ -1,23 +1,10 @@
 async function loadCart() {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-        window.location.replace("/login");
-        return;
-    }
-
     const response = await fetch("/api/cart/view", {
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
-
-    if (!response.ok) {
-        alert("Failed to load cart");
-        return;
-    }
-    
+    credentials: "include"
+});
     const data = await response.json();
+
+  
 
     const container = document.getElementById("cart-items");
     const totalEl = document.getElementById("cart-total");
@@ -61,13 +48,10 @@ async function changeQty(itemId, newQty) {
         return;
     }
 
-    const token = localStorage.getItem("access_token");
-
+   
     const res = await fetch(`/api/cart/item/${itemId}?quantity=${newQty}`, {
     method: "PATCH",
-    headers: {
-        "Authorization": "Bearer " + token
-    }
+    credentials: "include"
 });
 
     if (!res.ok) {
@@ -79,13 +63,11 @@ async function changeQty(itemId, newQty) {
 }
 async function removeItem(itemId) {
 
-    const token = localStorage.getItem("access_token");
+    
 
     const res = await fetch(`/api/cart/item/${itemId}`, {
     method: "DELETE",
-    headers: {
-        "Authorization": "Bearer " + token
-    }
+    credentials: "include"
 });
 
     if (!res.ok) {
@@ -96,20 +78,12 @@ async function removeItem(itemId) {
     loadCart(); 
 }
 async function checkout() {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-        window.location.href = "/login";
-        return;
-    }
+    
 
     const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
-
+    method: "POST",
+    credentials: "include"
+});
     if (!res.ok) {
         alert("Checkout failed");
         return;
@@ -120,9 +94,6 @@ async function checkout() {
     alert(
         `Order placed!\nOrder ID: ${data.order_id}\nAmount: ₹${data.amount}`
     );
-
-    // Optional redirect
-    // window.location.href = `/orders/${data.order_id}`;
 }
 
 document.addEventListener("DOMContentLoaded", loadCart);

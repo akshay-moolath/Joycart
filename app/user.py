@@ -79,7 +79,8 @@ def login_user( username: str = Form(...),
         value=token,
         httponly=True,
         samesite="lax",
-        secure=False   
+        secure=False,
+        path="/"  
     )
 
     return response
