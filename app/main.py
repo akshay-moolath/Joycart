@@ -41,9 +41,9 @@ def login():
 @app.get("/register")
 def register():
     return FileResponse("templates/register.html")
-@app.get('/dashboard')
-def dashboard():
-    return FileResponse("templates/dashboard.html")
+@app.get("/dashboard")
+def dashboard(current_user=Depends(get_current_user)):
+    return FileResponse("templates/tempdash.html")
 @app.get("/checkout/{order_id}")
 def checkout_page():
     return FileResponse("templates/checkout.html")

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt,JWTError
 import os
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status,Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -42,13 +42,28 @@ def decode_token(token: str):
             detail="Invalid or expired token"
         )
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer), db: Session = Depends(get_db)):
-    token = credentials.credentials
+def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    token = request.cookies.get("access_token")
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     data = decode_token(token)
     username = data.get("sub")
+
     if not username:
         raise HTTPException(status_code=401, detail="Invalid token payload")
-    user = db.query(models.User).filter(models.User.username == username).first()
+
+    user = (
+        db.query(models.User)
+        .filter(models.User.username == username)
+        .first()
+    )
+
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+
     return user
