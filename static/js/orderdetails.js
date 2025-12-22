@@ -56,21 +56,12 @@ function goToCheckout(orderId) {
     window.location.href = `/checkout/${orderId}`;
 }
 async function cancelOrder(orderId) {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        window.location.href = "/login";
-        return;
-    }
-
+    
     const confirmCancel = confirm("Are you sure you want to cancel this order?");
     if (!confirmCancel) return;
 
     const res = await fetch(`/api/orders/${orderId}/cancel`, {
-        method: "POST",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
+        method: "POST",});
 
     if (!res.ok) {
         const errorData = await res.json();
@@ -84,21 +75,11 @@ async function cancelOrder(orderId) {
 
 }
 async function Refund(orderId) {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        window.location.href = "/login";
-        return;
-    }
-
     const confirmCancel = confirm("Are you sure you want to request refund for this order?");
     if (!confirmCancel) return;
 
     const res = await fetch(`/api/orders/${orderId}/refund`, {
-        method: "POST",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
+        method: "POST",});
 
     if (!res.ok) {
         const errorData = await res.json();
