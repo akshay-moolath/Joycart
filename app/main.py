@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse,FileResponse
 from fastapi.templating import Jinja2Templates
 from app.auth import get_current_user
 from app.db import Base, engine,get_db
@@ -30,7 +30,7 @@ app.include_router(viewcart_router,prefix='/api/cart',dependencies=[Depends(get_
 app.include_router(product_router,prefix='/api/products')
 app.include_router(product_page_router)
 app.include_router(checkout_router,prefix="/api",dependencies=[Depends(get_current_user)])
-app.include_router(order_router,prefix="/api",dependencies=[Depends(get_current_user)])
+app.include_router(order_router,prefix="/api/orders",dependencies=[Depends(get_current_user)])
 app.include_router(payment_router,prefix="/payments",dependencies=[Depends(get_current_user)])
 
 templates = Jinja2Templates(directory="templates")
@@ -120,12 +120,13 @@ def orders(request: Request, db: Session = Depends(get_db)):
         }
     )
 
-@app.get("/orders/{order_id}", dependencies=[Depends(get_current_user)])
+@app.get("/orders/{order_id}",dependencies=[Depends(get_current_user)])
 def order_detail_page(request: Request):
-        return templates.TemplateResponse(
+    return templates.TemplateResponse(
         "orderdetails.html",
-        {"request":request}
+        {"request": request}
     )
+
 @app.get("/payment-success/{order_id}", dependencies=[Depends(get_current_user)])
 def payment_success(request: Request):
         return templates.TemplateResponse(
