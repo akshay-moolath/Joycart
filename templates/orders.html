@@ -1,18 +1,55 @@
 <style>
-    .status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  color: white;
-}
+  .orders-container {
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: sans-serif;
+  }
+  
+  .order-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-.status.pending { background: orange; }
-.status.paid { background: green; }
-.status.cancelled {background: red;}
-.status.refunded { background: blue; }
-.status.delivered { background: darkgreen; }
+  .status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    text-transform: capitalize;
+  }
 
+  .status.pending { background: orange; }
+  .status.paid { background: green; }
+  .status.cancelled { background: red; }
+  .status.refunded { background: blue; }
+  .status.delivered { background: darkgreen; }
 </style>
-<h2>Your Orders</h2>
-<div id="orders"></div>
 
-<script src="/static/js/orders.js"></script>
+<div class="orders-container">
+  <h2>Your Orders</h2>
+  
+  {% for o in orders %}
+  <div class="order-card">
+    <div>
+      <strong>Order ID: {{ o.id }}</strong>
+      <p style="color: #666; margin: 5px 0;">Date: {{ o.created_at.strftime('%Y-%m-%d') }}</p>
+      <p>Amount: ₹{{ o.amount }}</p>
+      <a href="/orders/{{o.id}}">View details</a>
+    </div>
+
+    <span class="status {{ o.status }}">
+      {{ o.status }}
+    </span>
+  </div>
+  
+    
+  
+  {% else %}
+    <p>You haven't placed any orders yet.</p>
+  {% endfor %}
+</div>

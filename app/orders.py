@@ -1,36 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException,Request
 from sqlalchemy.orm import Session
 from app.db import get_db
+from fastapi.templating import Jinja2Templates
+from app.auth import get_current_user
 from app.models import Order, OrderItems, Product,Payment
 import uuid
 
 router = APIRouter()
 
-@router.get("")#list all orders
-def get_orders(request: Request,
-    db: Session = Depends(get_db)
-    
-):
-    current_user = request.state.user
-    orders = (
+templates = Jinja2Templates(directory="templates")
+
+def get_orders(user_id: int, db: Session):
+    return (
         db.query(Order)
-        .filter(Order.user_id == current_user.id)
+        .filter(Order.user_id == user_id)
         .order_by(Order.created_at.desc())
         .all()
     )
-    
-    return [
-        {
-            "id": o.id,
-            "amount": o.amount,
-            "currency": o.currency,
-            "status": o.status,
-            "created_at": o.created_at
-        }
-        for o in orders
-    ]
-
-
 
 @router.get("/{order_id}")#get a single order
 def get_order_details(request: Request,
