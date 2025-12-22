@@ -1,1 +1,1 @@
-DROP TABLE orders_items;
+DROP TABLE sellers;
