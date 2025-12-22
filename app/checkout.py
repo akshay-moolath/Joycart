@@ -1,20 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-
 from app.db import get_db
-from app.auth import get_current_user
 from app.models import Cart, CartItem, Product, Order, OrderItems
 
 router = APIRouter()
 
 
 @router.post("/checkout")
-def checkout(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    
+def checkout(request: Request,
+    db: Session = Depends(get_db)
+    ):
+    current_user = request.state.user
     cart = (
         db.query(Cart)
         .filter(Cart.user_id == current_user.id)

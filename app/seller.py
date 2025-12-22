@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-
 from app.db import get_db
 from app.models import Seller
 from app.schemas import SellerCreate, SellerOut
-from app.auth import get_current_user
 from app.models import User
 
 router = APIRouter()
 
 @router.post("/seller/register", response_model=SellerOut)
-def register_seller(payload: SellerCreate,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+def register_seller(request: Request,payload: SellerCreate,db: Session = Depends(get_db)):
+    current_user = request.state.user
     existing_seller = (
         db.query(Seller)
         .filter(Seller.user_id == current_user.id)

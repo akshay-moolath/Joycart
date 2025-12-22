@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
-from app.auth import get_current_user
 from app.db import get_db
-from app.models import Cart, Product,User
-
+from app.models import Cart, Product
 router = APIRouter()
 
 @router.get("/view")
-def get_cart(
+def get_cart(request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    
 ):
+    current_user = request.state.user
     cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
 
     if not cart:

@@ -1,17 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Request
 from sqlalchemy.orm import Session
 from app.db import get_db
-from app.auth import get_current_user
 from app.models import Order, OrderItems, Product,Payment
 import uuid
 
 router = APIRouter()
 
 @router.get("")#list all orders
-def get_orders(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+def get_orders(request: Request,
+    db: Session = Depends(get_db)
+    
 ):
+    current_user = request.state.user
     orders = (
         db.query(Order)
         .filter(Order.user_id == current_user.id)
@@ -33,11 +33,12 @@ def get_orders(
 
 
 @router.get("/{order_id}")#get a single order
-def get_order_details(
+def get_order_details(request: Request,
     order_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    
 ):
+    current_user = request.state.user
     order = (
         db.query(Order)
         .filter(
@@ -96,7 +97,7 @@ def get_order_details(
     return data
 
 @router.post("/{order_id}/cancel")
-def cancel_order(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
+def cancel_order(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:
@@ -117,7 +118,8 @@ def cancel_order(order_id: int, db: Session = Depends(get_db),current_user= Depe
         "status": order.status
     }
 @router.post("/{order_id}/refund")
-def refund_order(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
+def refund_order(order_id: int, db: Session = Depends(get_db)):
+    
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:

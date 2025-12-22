@@ -10,7 +10,7 @@ from app.auth import get_current_user
 router = APIRouter()
 
 @router.post("")
-def payment(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
+def payment(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:
@@ -52,7 +52,7 @@ def payment(order_id: int, db: Session = Depends(get_db),current_user= Depends(g
 
 
 @router.get("/success/{order_id}")
-def payment_success(order_id: int, db: Session = Depends(get_db),current_user= Depends(get_current_user)):
+def payment_success(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:

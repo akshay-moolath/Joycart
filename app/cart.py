@@ -1,19 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.db import get_db
-from app.models import Cart, CartItem, Product, User
+from app.models import Cart, CartItem, Product
 from app.schemas import CartAdd, CartOut
-from app.auth import get_current_user
 
 router = APIRouter()
 
 @router.post("/add", response_model=CartOut)
-def add_to_cart(
+def add_to_cart(request:Request,
     payload: CartAdd,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
     
+):
+    current_user = request.state.user
     product = db.query(Product).filter(Product.id == payload.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -53,12 +52,13 @@ def add_to_cart(
 
 
 @router.patch("/item/{item_id}")
-def update_quantity(
+def update_quantity(request: Request,
     item_id: int,
     quantity: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    
 ):
+    current_user = request.state.user
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -71,11 +71,12 @@ def update_quantity(
 
 
 @router.delete("/item/{item_id}")
-def delete_quantity(
+def delete_quantity(request: Request,
     item_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    
 ):
+    current_user = request.state.user
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
