@@ -55,26 +55,46 @@ def login(request: Request):
         {"request": request}
     )
 @app.get("/register")
-def register():
-    return FileResponse("templates/register.html")
+def register(request: Request):
+     return templates.TemplateResponse(
+        "register.html",
+        {"request": request}
+    )
 @app.get("/dashboard")
-def dashboard():
-    return FileResponse("templates/dashboard.html")
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request":request}
+    )
 @app.get("/checkout/{order_id}")
-def checkout_page():
-    return FileResponse("templates/checkout.html")
+def checkout_page(request: Request):
+    return templates.TemplateResponse(
+        "checkout.html",
+        {"request":request}
+    )
 @app.get('/cart')
-def viewcart():   
-    return FileResponse("templates/viewcart.html")
-@app.get("/orders")
-def orders_page():
-    return FileResponse("templates/orders.html")
+def viewcart(request: Request):   
+    return templates.TemplateResponse(
+        "viewcart.html",
+        {"request":request}
+    )
+def orders_page(request: Request):
+        return templates.TemplateResponse(
+        "orders.html",
+        {"request":request}
+    )
 @app.get("/orders/{order_id}")
-def order_detail_page():
-    return FileResponse("templates/orderdetails.html")
+def order_detail_page(request: Request):
+        return templates.TemplateResponse(
+        "orderdetails.html",
+        {"request":request}
+    )
 @app.get("/payment-success/{order_id}")
-def payment_success():
-    return FileResponse("templates/payment_success.html")
+def payment_success(request: Request):
+        return templates.TemplateResponse(
+        "payment_success.html",
+        {"request":request}
+    )
 @app.get("/favicon.ico")#added to remove favicon error
 def favicon():
     return ""
