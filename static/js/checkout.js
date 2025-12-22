@@ -36,7 +36,7 @@ async function getOrder() {
 }
 
 async function payNow() {
-    const res = await fetch(`/api/payments?order_id=${orderId}`, {
+    const res = await fetch(`/payments?order_id=${orderId}`, {
         method: "POST"
     });
 
@@ -51,7 +51,7 @@ async function payNow() {
         return;
     }
 
-    window.location.href = `/payment-success/${orderId}`;
+    window.location.href = `/payments/status/${orderId}`;
 }
 
 getOrder();

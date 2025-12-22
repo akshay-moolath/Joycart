@@ -27,7 +27,7 @@ app.include_router(product_router,prefix='/api/products')
 app.include_router(product_page_router)
 app.include_router(checkout_router,prefix="/api",dependencies=[Depends(get_current_user)])
 app.include_router(order_router,prefix="/api/orders",dependencies=[Depends(get_current_user)])
-app.include_router(payment_router,prefix="/api/payments",dependencies=[Depends(get_current_user)])
+app.include_router(payment_router,prefix="/payments",dependencies=[Depends(get_current_user)])
 
 templates = Jinja2Templates(directory="templates")
 

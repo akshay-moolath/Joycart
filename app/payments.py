@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Request
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from app.db import get_db
+from fastapi.templating import Jinja2Templates
 from app.models import Order,OrderItems,Product,Payment
 import uuid
-from app.auth import get_current_user
+
 
 
 router = APIRouter()
+
+templates = Jinja2Templates(directory="templates")
 
 @router.post("")
 def payment(order_id: int, db: Session = Depends(get_db)):
@@ -51,18 +54,22 @@ def payment(order_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/success/{order_id}")
-def payment_success(order_id: int, db: Session = Depends(get_db)):
+@router.get("/status/{order_id}")
+def payment_success(request: Request, order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+    if order.status == "PAID":
+        details = "Payment Success"
+    elif order.status == "REFUNDED":
+        details = "Refund Success"
+    else:
+        details = "Order Cancelled"
 
-    if order.status != "PAID":
-        raise HTTPException(status_code=400, detail="Not Paid")
-
-    return {
-        "order_id": order.id,
-        "status": order.status
-    }
-
+    return templates.TemplateResponse(
+        "payment_status.html",
+        {   "request":request,
+            "status": order.status,
+            "details": details
+            
+        }
+    )
