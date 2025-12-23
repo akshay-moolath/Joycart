@@ -1,1 +1,154 @@
-<h1>Seller Dashboard</h1>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seller Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<!-- HEADER / NAVIGATION -->
+<header>
+    <h1>Seller Dashboard</h1>
+    <nav>
+        <a href="/seller/dashboard">Add Product</a> |
+        <a href="/seller/products">My Products</a> |
+        <a href="/seller/orders">Orders</a>
+    </nav>
+    <hr>
+</header>
+
+<!-- MAIN CONTENT -->
+<main>
+    <h2>Add New Product</h2>
+
+    <form method="post" action="/seller/products/create">
+
+        <!-- BASIC PRODUCT INFO -->
+        <fieldset>
+            <legend>Basic Product Information</legend>
+
+            <label>
+                Product Title<br>
+                <input type="text" name="title" required>
+            </label><br><br>
+
+            <label>
+                Description<br>
+                <textarea name="description" rows="4" required></textarea>
+            </label><br><br>
+
+            <label>
+                Category<br>
+                <input type="text" name="category" required>
+            </label><br><br>
+
+            <label>
+                SKU<br>
+                <input type="text" name="sku" required>
+            </label>
+        </fieldset>
+
+        <br>
+
+        <!-- PRICING & AVAILABILITY -->
+        <fieldset>
+            <legend>Pricing & Availability</legend>
+
+            <label>
+                Price<br>
+                <input type="number" name="price" step="0.01" required>
+            </label><br><br>
+
+            <label>
+                Discount Percentage<br>
+                <input type="number" name="discountPercentage" step="0.01" value="0">
+            </label><br><br>
+
+            <label>
+                Stock Quantity<br>
+                <input type="number" name="stock" min="0" required>
+            </label><br><br>
+
+            <label>
+                Availability Status<br>
+                <select name="availabilityStatus">
+                    <option value="IN_STOCK">In Stock</option>
+                    <option value="OUT_OF_STOCK">Out of Stock</option>
+                    <option value="PREORDER">Preorder</option>
+                </select>
+            </label><br><br>
+
+            <label>
+                Return Policy<br>
+                <input type="text" name="returnPolicy">
+            </label>
+        </fieldset>
+
+        <br>
+
+        <!-- PHYSICAL DETAILS -->
+        <fieldset>
+            <legend>Physical Details (Optional)</legend>
+
+            <label>
+                Weight (grams)<br>
+                <input type="number" name="weight">
+            </label><br><br>
+
+            <label>
+                Dimensions (cm)<br>
+                Length <input type="number" name="length" step="0.1">
+                Width <input type="number" name="width" step="0.1">
+                Height <input type="number" name="height" step="0.1">
+            </label><br><br>
+
+            <label>
+                Shipping Information<br>
+                <input type="text" name="shippingInformation">
+            </label><br><br>
+
+            <label>
+                Warranty Information<br>
+                <input type="text" name="warrantyInformation">
+            </label>
+        </fieldset>
+
+        <br>
+
+        <!-- MEDIA -->
+        <fieldset>
+            <legend>Product Images</legend>
+
+            <label>
+                Thumbnail URL<br>
+                <input type="url" name="thumbnail" required>
+            </label><br><br>
+
+            <label>
+                Image URL 1<br>
+                <input type="url" name="image1" required>
+            </label><br><br>
+
+            <label>
+                Image URL 2<br>
+                <input type="url" name="image2">
+            </label><br><br>
+
+            <label>
+                Image URL 3<br>
+                <input type="url" name="image3">
+            </label>
+        </fieldset>
+
+        <br>
+
+        <!-- SUBMIT -->
+        <button type="submit">Add Product</button>
+
+    </form>
+</main>
+
+</body>
+</html>

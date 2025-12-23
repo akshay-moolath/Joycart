@@ -19,7 +19,7 @@ from app.orders import router as order_router
 from app.payments import router as payment_router
 
 
-Base.metadata.create_all(bind = engine)#prefix="/api",
+Base.metadata.create_all(bind = engine)
 
 app = FastAPI()
 app.mount('/static',  StaticFiles(directory='static'), name = 'static')

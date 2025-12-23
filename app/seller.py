@@ -45,10 +45,13 @@ def register_seller(
     return RedirectResponse("/seller/dashboard", status_code=302)
 
 @router.get("/seller/dashboard")
-def seller_dashboard(request: Request):
+def seller_dashboard(request: Request,db: Session = Depends(get_db)):
+
+
     return templates.TemplateResponse(
         "seller_dashboard.html",
-        {"request": request}
+        {"request": request
+         }
     )
 
 @router.get("/seller/registerform")
@@ -88,3 +91,4 @@ def populate_products(db: Session, seller_id: int):
         db.add(product)
 
     db.commit()
+
