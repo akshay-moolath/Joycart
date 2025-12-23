@@ -4,13 +4,11 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-import cloudinary
-import os
-from dotenv import load_dotenv
 from app.auth import get_current_user
 from app.db import Base, engine,get_db
 from app.product import list_products
 from app.orders import get_orders
+import app.cloudinary_config
 from app.user import router as user_router
 from app.seller import router as seller_router
 from app.cart import router as cart_router
@@ -20,9 +18,6 @@ from app.product_page import router as product_page_router
 from app.checkout import router as checkout_router
 from app.orders import router as order_router
 from app.payments import router as payment_router
-
-
-load_dotenv()
 
 
 Base.metadata.create_all(bind = engine)
@@ -42,12 +37,7 @@ app.include_router(payment_router,prefix="/payments",dependencies=[Depends(get_c
 
 templates = Jinja2Templates(directory="templates")
 
-cloudinary.config(
-    CLOUD_NAME = os.getenv("CLOUD_NAME"),
-    API_KEY = os.getenv("API_KEY"),
-    API_SECRET = os.getenv("API_SECRET"),
-    SECURE = True
-)
+
 
 
 @app.get("/")
