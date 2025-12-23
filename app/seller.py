@@ -16,6 +16,7 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 
+############################################seller register endpoints######################################
 
 @router.get("/seller/check")
 def seller_check(request: Request, db: Session = Depends(get_db)):
@@ -64,93 +65,29 @@ def seller_register_page(request: Request):
         {"request": request}
     )
 
-@router.get("/seller/product/form")
-def seller_register_page(request: Request):
-    return templates.TemplateResponse(
-        "seller_product_form.html",
-        {"request": request}
-    )
+################################# Product Creation endpoints ################################################
 
 @router.post("/seller/product/create")
 def create_product(
     request: Request,
+    background_tasks: BackgroundTasks,
 
-    
     title: str = Form(...),
     description: str = Form(...),
     category: str = Form(...),
     sku: str = Form(...),
     price: float = Form(...),
-    discountPercentage: float = Form(0),
     stock: int = Form(...),
-    availabilityStatus: str = Form(...),
-    returnPolicy: str = Form(""),
-    weight: int = Form(None),
-    length: float = Form(None),
-    width: float = Form(None),
-    height: float = Form(None),
-    shippingInformation: str = Form(""),
-    warrantyInformation: str = Form(""),
 
-    
     thumbnail: UploadFile = File(...),
     images: list[UploadFile] = File(...),
 
     db: Session = Depends(get_db)
 ):
     current_user = request.state.user
-
-    if not current_user.is_seller:
-        return RedirectResponse("/seller/registerform", status_code=302)
-
     seller = db.query(Seller).filter(Seller.user_id == current_user.id).first()
 
     
-    thumb_result = cloudinary.uploader.upload(
-        thumbnail.file,
-        folder=f"products/{seller.id}/thumbnail"
-    )
-
-    public_id = thumb_result["public_id"]
-    thumbnail_url, _  = cloudinary_url(
-    public_id,
-    width=300,
-    height=300,
-    crop="fill",
-    gravity="auto",
-    fetch_format="auto",
-    quality="auto"
-)
-
-    
-    image_urls = [] 
-    for img in images:
-        result = cloudinary.uploader.upload(
-            img.file,
-            folder=f"products/{seller.id}/images"
-        )
-        public_id = result["public_id"]
-        url, _ = cloudinary_url(
-    public_id,
-    width=1000,
-    height=1000,
-    crop="fill",
-    gravity="auto",
-    fetch_format="auto",
-    quality="auto"
-)
-    image_urls.append(url)
-
-   
-    dimensions = None
-    if length or width or height:
-        dimensions = {
-            "length": length,
-            "width": width,
-            "height": height
-        }
-
-   
     product = Product(
         seller_id=seller.id,
         title=title,
@@ -158,23 +95,89 @@ def create_product(
         category=category,
         sku=sku,
         price=price,
-        discountPercentage=discountPercentage,
         stock=stock,
-        availabilityStatus=availabilityStatus,
-        returnPolicy=returnPolicy,
-        weight=weight,
-        dimensions=dimensions,
-        shippingInformation=shippingInformation,
-        warrantyInformation=warrantyInformation,
-        thumbnail=thumbnail_url,
-        images=image_urls,
+        thumbnail=None,
+        images=[]
     )
 
     db.add(product)
     db.commit()
+    db.refresh(product)
 
+    
+    background_tasks.add_task(
+        upload_product_images,
+        product.id,
+        seller.id,
+        thumbnail,
+        images,
+        db
+    )
+
+    
     return RedirectResponse("/seller/dashboard", status_code=302)
 
+@router.get("/seller/product/form")
+def seller_register_page(request: Request):
+    return templates.TemplateResponse(
+        "seller_product_form.html",
+        {"request": request}
+    )
+
+def upload_product_images(
+    product_id: int,
+    seller_id: int,
+    thumbnail: UploadFile,
+    images: list[UploadFile],
+    db:Session
+):
+    
+
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return
+
+    
+    thumb_result = cloudinary.uploader.upload(
+        thumbnail.file,
+        folder=f"products/{seller_id}/thumbnail"
+    )
+    thumb_public_id = thumb_result["public_id"]
+
+    thumbnail_url, _ = cloudinary_url(
+        thumb_public_id,
+        width=300,
+        height=300,
+        crop="fill",
+        gravity="auto",
+        fetch_format="auto",
+        quality="auto"
+    )
+
+    
+    image_urls = []
+    for img in images:
+        result = cloudinary.uploader.upload(
+            img.file,
+            folder=f"products/{seller_id}/images"
+        )
+
+        public_id = result["public_id"]
+        url, _ = cloudinary_url(
+            public_id,
+            width=1000,
+            height=1000,
+            crop="fill",
+            gravity="auto",
+            fetch_format="auto",
+            quality="auto"
+        )
+        image_urls.append(url)
+
+    product.thumbnail = thumbnail_url
+    product.images = image_urls
+    db.commit()
+    db.close()
 
 def populate_products(db: Session, seller_id: int):
     with open("products.json", "r", encoding="utf-8") as f:
