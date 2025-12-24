@@ -14,7 +14,6 @@ from app.seller import router as seller_router
 from app.cart import router as cart_router
 from app.viewcart import router as viewcart_router
 from app.product import router as product_router
-from app.product_page import router as product_page_router
 from app.checkout import router as checkout_router
 from app.orders import router as order_router
 from app.payments import router as payment_router
@@ -29,8 +28,7 @@ app.include_router(user_router, prefix="/api")
 app.include_router(seller_router,dependencies=[Depends(get_current_user)])
 app.include_router(cart_router,prefix="/api/cart",dependencies=[Depends(get_current_user)])
 app.include_router(viewcart_router,prefix='/api/cart',dependencies=[Depends(get_current_user)])
-app.include_router(product_router,prefix='/api/products')
-app.include_router(product_page_router)
+app.include_router(product_router)
 app.include_router(checkout_router,prefix="/api",dependencies=[Depends(get_current_user)])
 app.include_router(order_router,prefix="/api/orders",dependencies=[Depends(get_current_user)])
 app.include_router(payment_router,prefix="/payments",dependencies=[Depends(get_current_user)])
