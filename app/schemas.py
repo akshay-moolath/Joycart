@@ -114,12 +114,14 @@ class OrderOut(BaseModel):
 
 class OrderItemCreate(BaseModel):
     product_id: int
+    seller_id:int
     quantity: int
 
 class OrderItemOut(BaseModel):
     id: int
     order_id: int
     product_id: int
+    seller_id: int
     quantity: int
     price_at_purchase: float
 

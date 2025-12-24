@@ -38,6 +38,7 @@ if (order.status === "PENDING") {
 else if (order.status === "PAID") {
         container.innerHTML += `
             <hr>
+            
             <p><b>Payment ID:</b> ${order.payment}</p>
             <button onclick="Refund(${order.id})">
                 Request Refund
@@ -48,6 +49,7 @@ else if (order.status === "PAID") {
 else if (order.status === "REFUNDED"){
         container.innerHTML += `
         <hr>
+        
         <p><b>Refund ID:</b> ${order.payment}</p>
         <a href="/">Home</a>
     `;
@@ -55,6 +57,7 @@ else if (order.status === "REFUNDED"){
 else if (order.status === "CANCELLED") {
     container.innerHTML += `
         <hr>
+        
         <a href="/">Home</a>
     `;
 }

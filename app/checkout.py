@@ -41,6 +41,7 @@ def checkout(request: Request,
             OrderItems(
                 product_id=product.id,
                 quantity=item.quantity,
+                seller_id=product.seller_id,
                 price_at_purchase=product.price
             )
         )
