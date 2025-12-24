@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from fastapi.templating import Jinja2Templates
 from app.auth import hash_password, verify_password, create_access_token,get_current_user
-from app.models import User
+from app.models import User, Address
 from app.schemas import UserOut
 
 
@@ -108,3 +108,41 @@ def account(
             "email": current_user.email
         }
     )
+
+
+@router.post("/address/add")
+def add_address( current_user: User = Depends(get_current_user),
+    name: str = Form(...),
+    phone: str = Form(...),
+    address_line1: str = Form(...),
+    address_line2: str = Form(None),
+    city: str = Form(...),
+    state: str = Form(...),
+    pincode: str = Form(...),
+    is_default: bool = Form(False),
+    db: Session = Depends(get_db)
+):
+
+    if is_default:
+        db.query(Address).filter(
+            Address.user_id == current_user.id,
+            Address.is_default == True
+        ).update({"is_default": False})
+
+    address = Address(
+        user_id=current_user.id,
+        name=name,
+        phone=phone,
+        address_line1=address_line1,
+        address_line2=address_line2,
+        city=city,
+        state=state,
+        pincode=pincode,
+        is_default=is_default
+    )
+
+    db.add(address)
+    db.commit()
+
+    return RedirectResponse("/dashboard", status_code=302)
+

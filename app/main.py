@@ -135,6 +135,13 @@ def payment_success(request: Request):
         {"request":request}
     )
 
+@app.get("/address/form")
+def address_form(request: Request):
+    return templates.TemplateResponse(
+        "address_form.html",
+        {"request": request}
+    )
+
 @app.get("/favicon.ico")#added to remove favicon error
 def favicon():
     return ""
