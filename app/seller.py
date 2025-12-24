@@ -221,3 +221,36 @@ def populate_products(db: Session, seller_id: int):
 
     db.commit()
 
+#######seller product page############
+
+@router.get("/seller/products")
+def seller_products(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    current_user = request.state.user
+
+    if not current_user.is_seller:
+        return RedirectResponse("/seller/registerform", status_code=302)
+
+    seller = (
+        db.query(Seller)
+        .filter(Seller.user_id == current_user.id)
+        .first()
+    )
+
+    products = (
+        db.query(Product)
+        .filter(Product.seller_id == seller.id)
+        .order_by(Product.id.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        "seller_products.html",
+        {
+            "request": request,
+            "products": products
+        }
+    )
+

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Joycart-Dashboard</title>
+    <title>Seller-Products</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
@@ -36,14 +36,8 @@
 </head>
 <body>
 
-<h1>JOYCART</h1>
-<a href = '/cart'>View Cart</a> |
-<a href = '/orders'>Orders</a>  |
-<a href = '/api/profile'>My Profile</a> |
-<a href= "/seller/check">Seller Hub</a> |
-<form action="/api/logout" method="post" style="display: inline;">
-    <button type="submit">Logout</button>
-</form><br></br>
+<h2>Seller Products</h2>
+<a href = "/seller/dashboard">Dashboard</a><br></br>
 {% include "partials/products_grid.html" %}
 </body>
 </html>
