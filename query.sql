@@ -1,2 +1,2 @@
 DELETE FROM products
-WHERE id = 32;
+WHERE id = 33;

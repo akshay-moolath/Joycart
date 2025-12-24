@@ -1,4 +1,6 @@
-<h2>Add New Product</h2>
+
+<title>Add new Product</title>
+<a href ="/seller/dashboard" style="display: inline;">Dashboard</a><br></br>
 
 <form method="post"
       action="/seller/product/create"
@@ -97,18 +99,19 @@
         <legend>Upload Product Images</legend>
 
         <label>
-            Thumbnail<br>
+            Thumbnail 
             <input type="file" name="thumbnail" accept="image/*" required>
         </label><br><br>
 
         <label>
-            Product Images<br>
+            Images 
             <input type="file" name="images" accept="image/*" multiple required>
-        </label>
+        </label><br><br>
     </fieldset>
 
     <br>
 
-    <button type="submit">Add Product</button>
+    <button type="submit">Add Product</button> Please wait after clicking the button,upload might take few seconds
+    
 
 </form>

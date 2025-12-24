@@ -15,7 +15,7 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
 
-
+####################Seller Register##################
 
 @router.get("/seller/check")
 def seller_check(request: Request, db: Session = Depends(get_db)):
@@ -63,6 +63,11 @@ def seller_register_page(request: Request):
         "seller_register.html",
         {"request": request}
     )
+
+
+
+####################Product Create##################
+
 
 @router.get("/seller/product/form")
 def seller_register_page(request: Request):
@@ -139,7 +144,7 @@ def create_product(
     fetch_format="auto",
     quality="auto"
 )
-    image_urls.append(url)
+        image_urls.append(url)
 
    
     dimensions = None
