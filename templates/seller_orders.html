@@ -1,0 +1,51 @@
+<style>
+  .orders-container {
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: sans-serif;
+  }
+  
+  .order-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    text-transform: capitalize;
+  }
+
+  .status.pending { background: orange; }
+  .status.paid { background: green; }
+  .status.cancelled { background: red; }
+  .status.refunded { background: blue; }
+  .status.delivered { background: darkgreen; }
+</style>
+
+<div class="orders-container">
+  <h2>Your Orders</h2>
+  <a href ='/'>Home</a><br></br>
+  {% for o in orderitems %}
+  <div class="order-card">
+    <div>
+      <strong>Order ID: {{ o.order_id }}</strong>
+      <p>Price: ₹{{ o.price_at_purchase }}</p>
+      <p>Quantity: {{ o.quantity }}</p>
+      <a href="/products/{{o.product_id}}">View product</a>
+    </div>
+    
+
+  </div>
+  
+  {% else %}
+    <p>No orders.</p>
+  {% endfor %}
+</div>

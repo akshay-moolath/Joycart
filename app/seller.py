@@ -3,8 +3,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from app.db import get_db
-from app.models import Seller
-from app.models import Product
+from app.models import Seller,Product,OrderItems,Order
 from fastapi import BackgroundTasks
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
@@ -254,3 +253,34 @@ def seller_products(
         }
     )
 
+###############seller orders###############
+@router.get('/seller/orders')
+def get_seller_order(request: Request,
+    db: Session = Depends(get_db)):
+
+    current_user = request.state.user
+
+    if not current_user.is_seller:
+        return RedirectResponse("/seller/registerform", status_code=302)
+
+    seller = (
+        db.query(Seller)
+        .filter(Seller.user_id == current_user.id)
+        .first()
+    )
+    
+    orderitems = (
+        db.query(OrderItems)
+        .filter(OrderItems.seller_id == seller.id)
+        .order_by(OrderItems.id.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        "seller_orders.html",
+        {
+            "request": request,
+            "orderitems": orderitems
+            
+        }
+    )
