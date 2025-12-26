@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float,Boolean,JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float,Boolean,JSON
 from app.db import Base
 from sqlalchemy.orm import relationship
-from typing import Optional
 from datetime import datetime
+import uuid
+
+
 
 
 
@@ -80,12 +82,13 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    checkout_id = Column(String, unique=True, nullable=False)
     amount = Column(Float, nullable=False)
     status = Column(String, nullable=False)
     currency = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     expires_at = Column(DateTime, nullable=False)
-    shipping_address = Column(JSON,nullable=False)
+    shipping_address = Column(JSON,nullable=True)
 
 
 class OrderItems(Base):

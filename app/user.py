@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from fastapi.templating import Jinja2Templates
 from app.auth import hash_password, verify_password, create_access_token,get_current_user
-from app.models import User, Address
-from app.schemas import UserOut
+from app.models import User, Address,Order
 from app.product import list_products
 
 
@@ -16,6 +15,7 @@ pages_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 ###############################REGISTER#########################################
+
 @router.post("/register")
 def create_user(
     username: str = Form(...),
@@ -45,7 +45,7 @@ def register(request: Request):
     token = request.cookies.get("access_token")
 
     if token:
-        return RedirectResponse("/dashboard", status_code=302)
+        return RedirectResponse("/home", status_code=302)
 
     return templates.TemplateResponse(
         "register.html",
@@ -53,6 +53,7 @@ def register(request: Request):
     )
 
 ############################LOGIN AND LOGOUT#################################
+
 @router.post("/login")
 def login_user( username: str = Form(...),
     password: str = Form(...), 
@@ -71,7 +72,7 @@ def login_user( username: str = Form(...),
     token = create_access_token({"sub": user.username})
 
     response = RedirectResponse(
-        "/dashboard",
+        "/home",
         status_code=302
     )
 
@@ -92,7 +93,7 @@ def login(request: Request):
     token = request.cookies.get("access_token")
 
     if token:
-        return RedirectResponse("/dashboard", status_code=302)
+        return RedirectResponse("/home", status_code=302)
 
     return templates.TemplateResponse(
         "login.html",
@@ -104,8 +105,10 @@ def logout():
     response = RedirectResponse("/", status_code=302)
     response.delete_cookie("access_token")
     return response
+
 ##########################DASHBOARD AND PROFILE###############################
-@pages_router.get("/dashboard", dependencies=[Depends(get_current_user)])
+
+@pages_router.get("/home", dependencies=[Depends(get_current_user)])
 def dashboard(
     request: Request,
     db: Session = Depends(get_db)
@@ -113,7 +116,7 @@ def dashboard(
     products = list_products(db)
 
     return templates.TemplateResponse(
-        "dashboard.html",
+        "home.html",
         {"request": request, "products": products}
     )
 
@@ -132,7 +135,8 @@ def profile(
         }
     )
 
-################################ADDRESS ADD,DELETE,EDIT#############################
+################################ ADD,DELETE AND EDIT ADDRESS#############################
+
 @router.post("/address/add")
 def add_address(current_user: User = Depends(get_current_user),
     name: str = Form(...),
@@ -167,16 +171,16 @@ def add_address(current_user: User = Depends(get_current_user),
     db.add(address)
     db.commit()
 
-    return RedirectResponse("/addresses", status_code=302)
+    return RedirectResponse("/address", status_code=302)
 
-@pages_router.get('/address/form', dependencies=[Depends(get_current_user)])
+@pages_router.get('/address/add', dependencies=[Depends(get_current_user)])
 def add_address(request: Request):
     return templates.TemplateResponse(
-        "address_form.html",
+        "address_add.html",
         {"request":request}
         )
 
-@pages_router.get("/addresses")
+@pages_router.get("/address")
 def get_address(request:Request,current_user: User = Depends(get_current_user),db:Session=Depends(get_db)):
 
     addresses = db.query(Address).filter(Address.user_id ==current_user.id).all()
@@ -188,28 +192,7 @@ def get_address(request:Request,current_user: User = Depends(get_current_user),d
         }
     )
 
-@pages_router.get("/address/edit/{address_id}")
-def edit_address_page(
-    address_id: int,
-    request: Request,
-    current_user = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    address = db.query(Address).filter(
-        Address.id == address_id,
-        Address.user_id == current_user.id
-    ).first()
 
-    if not address:
-        raise HTTPException(status_code=404)
-
-    return templates.TemplateResponse(
-        "address_edit.html",
-        {
-            "request": request,
-            "address": address
-        }
-    )
 @router.post("/address/edit/{address_id}")
 def edit_address(
     address_id: int,
@@ -238,7 +221,30 @@ def edit_address(
     address.pincode = pincode
     db.commit()
 
-    return RedirectResponse("/addresses", status_code=302)
+    return RedirectResponse("/address", status_code=302)
+
+@pages_router.get("/address/edit/{address_id}")
+def edit_address_page(
+    address_id: int,
+    request: Request,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    address = db.query(Address).filter(
+        Address.id == address_id,
+        Address.user_id == current_user.id
+    ).first()
+
+    if not address:
+        raise HTTPException(status_code=404)
+
+    return templates.TemplateResponse(
+        "address_edit.html",
+        {
+            "request": request,
+            "address": address
+        }
+    )
 
 @router.post("/address/delete/{address_id}")
 def delete_address(
@@ -267,4 +273,60 @@ def delete_address(
     db.delete(address)
     db.commit()
 
-    return RedirectResponse("/addresses", status_code=302)
+    return RedirectResponse("/address", status_code=302)
+
+
+from fastapi import Form, HTTPException
+
+@router.post("/address/select")
+def delivery_address(
+    selected_address_id: int = Form(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    address = db.query(Address).filter(
+        Address.id == selected_address_id,
+        Address.user_id == current_user.id
+    ).first()
+
+    if not address:
+        raise HTTPException(status_code=404, detail="Address not found")
+
+    
+    shipping_address = {
+        "name": address.name,
+        "phone": address.phone,
+        "address_line1": address.address_line1,
+        "address_line2": address.address_line2,
+        "city": address.city,
+        "state": address.state,
+        "pincode": address.pincode
+    }
+
+    
+    order = db.query(Order).filter(
+        Order.user_id == current_user.id,
+        Order.status == "PENDING"
+    ).first()
+
+    if not order:
+        raise HTTPException(status_code=400, detail="No active order")
+
+    
+    order.shipping_address = shipping_address
+    db.commit()
+
+    return RedirectResponse("/orders/summary", status_code=302)
+
+@pages_router.get("/address/select")
+def select_delivery_address(request:Request,current_user: User = Depends(get_current_user),db:Session=Depends(get_db)):
+
+    addresses = db.query(Address).filter(Address.user_id ==current_user.id).all()
+
+    return templates.TemplateResponse(
+        "address_delivery.html",{
+            'request':request,
+            'addresses':addresses
+        }
+    )

@@ -85,21 +85,21 @@ async function removeItem(itemId) {
 async function checkout() {
     
 
-    const res = await fetch("/api/checkout", {
+    const res = await fetch("/api/orders/place", {
     method: "POST",
     credentials: "include"
 });
     if (!res.ok) {
-        alert("Checkout failed");
+        alert("Placing Order Failed");
         return;
     }
 
     const data = await res.json();
 
-    alert(
+   /* alert(
         `Order placed!\nOrder ID: ${data.order_id}\nAmount: ₹${data.amount}`
-    );
-    window.location.href = `/orders/${data.order_id}`;
+    );*/
+    window.location.href = `/address/select`;
 }
 
 document.addEventListener("DOMContentLoaded", loadCart);

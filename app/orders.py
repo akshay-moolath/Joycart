@@ -3,24 +3,87 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from fastapi.templating import Jinja2Templates
 from app.auth import get_current_user
-from app.models import Order, OrderItems, Product,Payment
+from app.models import Order, OrderItems, Product,Payment,Cart
 import uuid
+from datetime import datetime, timedelta
 
 router = APIRouter()
 pages_router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
 
-def get_orders(user_id: int, db: Session):
-    return (
-        db.query(Order)
-        .filter(Order.user_id == user_id)
-        .order_by(Order.created_at.desc())
-        .all()
+######################PLACE ORDER###########################
+
+@router.post("/place")
+def place_order(request: Request,
+    db: Session = Depends(get_db)
+    ):
+    current_user = request.state.user
+    cart = (
+        db.query(Cart)
+        .filter(Cart.user_id == current_user.id)
+        .first()
     )
 
-@router.get("/{order_id}")#get a single order
-def get_order_details(request: Request,
+    if not cart or not cart.items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    total_amount = 0
+    order_items: list[OrderItems] = []
+
+    for item in cart.items:
+        product = (
+            db.query(Product)
+            .filter(Product.id == item.product_id)
+            .first()
+        )
+
+        if not product:
+            continue
+
+        subtotal = product.price * item.quantity
+        total_amount += subtotal
+
+        order_items.append(
+            OrderItems(
+                product_id=product.id,
+                quantity=item.quantity,
+                seller_id=product.seller_id,
+                price_at_purchase=product.price
+            )
+        )
+
+    if total_amount == 0:
+        raise HTTPException(status_code=400, detail="Invalid cart")
+
+    
+    order = Order(
+        user_id=current_user.id,
+        amount=total_amount,
+        status="PENDING",
+        currency="INR",
+        expires_at=datetime.utcnow() + timedelta(minutes=30)
+    )
+
+    db.add(order)
+    db.flush()  
+
+    
+    for oi in order_items:
+        oi.order_id = order.id
+        db.add(oi)
+
+    
+    #db.query(CartItem).filter(CartItem.cart_id == cart.id).delete()
+
+    db.commit()
+
+    return {"order_id": order.id}
+
+############################GET ORDERS##############################
+
+@router.get("/{order_id}")
+def get_single_order(request: Request,
     order_id: int,
     db: Session = Depends(get_db),
     
@@ -83,7 +146,25 @@ def get_order_details(request: Request,
 
     return data
 
-@router.post("/{order_id}/cancel")
+@pages_router.get("/orders")
+def get_all_orders(request: Request, db: Session = Depends(get_db)):
+
+    current_user = request.state.user 
+    
+    orders = db.query(Order).filter(Order.user_id ==current_user.id).order_by(Order.created_at.desc()).all()
+
+    return templates.TemplateResponse(
+        "orders.html",
+        {
+            "request": request, 
+            "orders": orders
+            
+        }
+    )
+
+#######################################CANCEL AND REFUND ORDERS###################################
+
+@router.post("/cancel/{order_id}")
 def cancel_order(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
 
@@ -104,7 +185,7 @@ def cancel_order(order_id: int, db: Session = Depends(get_db)):
         "order_id": order.id,
         "status": order.status
     }
-@router.post("/{order_id}/refund")
+@router.post("/refund/{order_id}")
 def refund_order(order_id: int, db: Session = Depends(get_db)):
     
     order = db.query(Order).filter(Order.id == order_id).first()
@@ -142,25 +223,17 @@ def refund_order(order_id: int, db: Session = Depends(get_db)):
         "status": order.status
     }
 
-@pages_router.get("/orders")
-def orders(request: Request, db: Session = Depends(get_db)):
 
-    current_user = request.state.user 
-    
-    orders = get_orders(current_user.id, db)
-
-    return templates.TemplateResponse(
-        "orders.html",
-        {
-            "request": request, 
-            "orders": orders
-            
-        }
-    )
 
 @pages_router.get("/orders/{order_id}")
 def order_detail_page(request: Request):
     return templates.TemplateResponse(
         "orderdetails.html",
+        {"request": request}
+    )
+@pages_router.get("/orders/summary")
+def order_summary(request: Request):
+    return templates.TemplateResponse(
+        "order_summary.html",
         {"request": request}
     )

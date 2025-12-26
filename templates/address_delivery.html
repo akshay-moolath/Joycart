@@ -1,0 +1,61 @@
+<style>
+  .address-container {
+    max-width: 900px;
+    margin: 20px auto;
+    font-family: sans-serif;
+  }
+
+  .address-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
+  }
+
+  .address-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .address-card p {
+    margin: 4px 0;
+  }
+</style>
+
+<h2>Choose delivery address</h2>
+
+<div class="address-container">
+
+  <form action="/api/address/select" method="post">
+
+    <div class="address-grid">
+      {% for ad in addresses %}
+        <div class="address-card">
+          <input
+            type="radio"
+            name="selected_address_id"
+            value="{{ ad.id }}"
+            id="addr_{{ ad.id }}"
+            required
+          >
+
+          <label for="addr_{{ ad.id }}">
+            <p><b>Name:</b> {{ ad.name }}</p>
+            <p><b>Phone:</b> {{ ad.phone }}</p>
+            <p><b>Address1:</b> {{ ad.address_line1 }}<br>{{ ad.address_line2 }}</br></p>
+            <p><b>City:</b> {{ ad.city }}</p>
+            <p><b>State:</b> {{ ad.state }}</p>
+            <p><b>Pincode:</b> {{ ad.pincode }}</p>
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+    <br></br>
+    <button type="submit" class="continue-btn">
+      Continue
+    </button>
+
+  </form>
+
+</div>

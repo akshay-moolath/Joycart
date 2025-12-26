@@ -10,6 +10,7 @@ from app.product import list_products
 from app.user import router as user_router
 from app.user import pages_router as user_pages_router
 from app.seller import router as seller_router
+from app.seller import pages_router as seller_pages_router
 from app.cart import router as cart_router
 from app.cart import pages_router as cart_pages_router
 from app.product import router as product_router
@@ -31,6 +32,7 @@ app.mount('/static',  StaticFiles(directory='static'), name = 'static')
 app.include_router(user_router, prefix="/api")
 app.include_router(user_pages_router)
 app.include_router(seller_router,dependencies=[Depends(get_current_user)])
+app.include_router(seller_pages_router,dependencies=[Depends(get_current_user)])
 app.include_router(cart_router,prefix="/api/cart",dependencies=[Depends(get_current_user)])
 app.include_router(cart_pages_router,dependencies=[Depends(get_current_user)])
 app.include_router(product_router)
@@ -48,19 +50,19 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-def homepage(
+def joycart(
     request: Request,
     db: Session = Depends(get_db)
 ):
     token = request.cookies.get("access_token")
 
     if token:
-        return RedirectResponse("/dashboard")
+        return RedirectResponse("/home")
 
     products = list_products(db)
 
     return templates.TemplateResponse(
-        "homepage.html",
+        "joycart.html",
         {"request": request, "products": products}
     )
     

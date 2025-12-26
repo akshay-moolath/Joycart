@@ -14,6 +14,8 @@ from collections import defaultdict
 
 router = APIRouter()
 
+pages_router = APIRouter()
+
 templates = Jinja2Templates(directory="templates")
 
 cloudinary.config(
@@ -59,7 +61,7 @@ def register_seller(
 
     return RedirectResponse("/seller/dashboard", status_code=302)
 
-@router.get("/seller/dashboard")
+@pages_router.get("/seller/dashboard")
 def seller_dashboard(request: Request):
     return templates.TemplateResponse(
         "seller_dashboard.html",
@@ -67,7 +69,7 @@ def seller_dashboard(request: Request):
          }
     )
 
-@router.get("/seller/registerform")
+@pages_router.get("/seller/registerform")
 def seller_register_page(request: Request):
     return templates.TemplateResponse(
         "seller_register.html",
@@ -79,10 +81,10 @@ def seller_register_page(request: Request):
 ####################Product Create##################
 
 
-@router.get("/seller/product/form")
+@pages_router.get("/seller/product/add")
 def seller_register_page(request: Request):
     return templates.TemplateResponse(
-        "seller_product_form.html",
+        "seller_product_add.html",
         {"request": request}
     )
 
@@ -224,7 +226,7 @@ def populate_products(db: Session, seller_id: int):
 
 #######seller product page############
 
-@router.get("/seller/products")
+@pages_router.get("/seller/products")
 def seller_products(
     request: Request,
     db: Session = Depends(get_db)
@@ -256,7 +258,7 @@ def seller_products(
     )
 
 ###############seller orders###############
-@router.get('/seller/orders')
+@pages_router.get('/seller/orders')
 def get_seller_order(request: Request,
     db: Session = Depends(get_db)):
 
