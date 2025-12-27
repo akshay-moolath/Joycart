@@ -12,7 +12,7 @@
 
   <form method="post" action="/api/checkout/prepaid/confirm">
     <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-    <button type="submit">Pay Now</button>
+    <button type="submit"onclick="allowConfirmNavigation()">Pay Now</button>
   </form>
 
   <br>
@@ -20,6 +20,20 @@
   <a href="/checkout/summary?checkout_id={{ checkout_id }}">
     ← Back to Order Summary
   </a>
+<script>
+  let allowNavigation = false;
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!allowNavigation) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  function allowConfirmNavigation() {
+    allowNavigation = true;
+  }
+</script>
 
 </body>
 </html>

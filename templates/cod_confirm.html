@@ -1,11 +1,29 @@
+<html>
+<body>
 <h2>Confirm Cash on Delivery</h2>
 
 <p>Are you sure you want to place this order with Cash on Delivery?</p>
 
 <form method="post" action="/api/checkout/cod/confirm">
   <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-  <button type="submit">Place Order</button>
+  <button type="submit" onclick="allowConfirmNavigation()">Place Order</button>
 </form>
   <a href="/checkout/summary?checkout_id={{ checkout_id }}">
     ← Back to Order Summary
   </a>
+  <script>
+  let allowNavigation = false;
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!allowNavigation) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  function allowConfirmNavigation() {
+    allowNavigation = true;
+  }
+</script>
+</body>
+</html>
