@@ -470,3 +470,13 @@ def payment_success(request: Request,
     return RedirectResponse("/payment/success",
         status_code=302
     )
+
+@pages_router.get("/payment/success")
+def payment_success(request:Request):
+
+    return templates.TemplateResponse(
+        "prepaid_success.html",
+        {
+            "request": request
+            }
+    )

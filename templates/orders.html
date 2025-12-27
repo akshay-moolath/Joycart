@@ -39,8 +39,7 @@
       <strong>Order ID: {{ o.id }}</strong>
       <p style="color: #666; margin: 5px 0;">Date: {{ o.created_at.strftime('%Y-%m-%d') }}</p>
       <p>Amount: ₹{{ o.amount }}</p>
-      <a href="/orders/{{o.id}}">View details</a> |
-      <a href="/payments/status/{{o.id}}">Payment details</a>
+      <a href="/orders/{{o.id}}">View details</a> 
     </div>
     
     <span class="status {{ o.status }}">
