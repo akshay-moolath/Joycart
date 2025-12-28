@@ -249,6 +249,16 @@ def place_cod_order(
     ).first()
     if not checkout:
         raise HTTPException(404)
+    
+    existing_order = db.query(Order).filter(
+            Order.checkout_id == checkout.checkout_id
+        ).first()
+
+    if existing_order:
+        return RedirectResponse(
+            "/checkout/cod/orderplace",
+            status_code=302
+        )
 
     cart = db.query(Cart).filter(
         Cart.user_id == current_user.id
@@ -300,6 +310,7 @@ def place_cod_order(
     order = Order(
         user_id=current_user.id,
         amount=total_amount,
+        checkout_id=checkout.checkout_id,
         shipping_address=checkout.shipping_address,
         status="PLACED",
         currency="INR"
@@ -400,6 +411,16 @@ def payment_success(request: Request,
 
     if not checkout:
         raise HTTPException(404)
+    
+    existing_order = db.query(Order).filter(
+        Order.checkout_id == checkout.checkout_id
+    ).first()
+
+    if existing_order:
+        return RedirectResponse(
+        "/payment/success",
+        status_code=302
+    )
 
     cart = db.query(Cart).filter(
         Cart.user_id == current_user.id
@@ -451,6 +472,7 @@ def payment_success(request: Request,
     order = Order(
         user_id=current_user.id,
         amount=total_amount,
+        checkout_id=checkout.checkout_id,
         shipping_address=checkout.shipping_address,
         status="PAID",
         currency="INR"
