@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from fastapi import Header
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 from app.models import Cart,Payment,Product,Checkout,OrderItems,Address,CartItem,Order
 import uuid
 
 router = APIRouter()
 pages_router = APIRouter()
+
+_last_cleanup = None
 
 templates = Jinja2Templates(directory="templates")
 
@@ -20,6 +22,8 @@ def start_checkout(
     db: Session = Depends(get_db)
 ):
     current_user = request.state.user
+
+    lazy_cleanup_checkouts(db)
 
     cart = db.query(Cart).filter(
         Cart.user_id == current_user.id
@@ -520,23 +524,17 @@ def payment_success(request:Request):
             }
     )
 
-@router.post("/internal/cleanup-checkouts")
-def cleanup_abandoned_checkouts(
-    db: Session = Depends(get_db),
-    x_cron_key: str = Header(None)
-):
-    if x_cron_key != os.getenv("CRON_SECRET"):
-        raise HTTPException(status_code=403)
+def lazy_cleanup_checkouts(db):
+    global _last_cleanup
 
     now = datetime.utcnow()
 
-    deleted = db.query(Checkout).filter(
+    if _last_cleanup and now - _last_cleanup < timedelta(minutes=10):
+        return
+
+    db.query(Checkout).filter(
         Checkout.expires_at < now
     ).delete()
 
     db.commit()
-
-    return {
-        "status": "ok",
-        "deleted_checkouts": deleted
-    }
+    _last_cleanup = now
