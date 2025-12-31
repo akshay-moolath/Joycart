@@ -1,64 +1,136 @@
-<style>
-  .orders-container {
-    max-width: 800px;
-    margin: 20px auto;
-    font-family: sans-serif;
-  }
-  
-  .order-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Seller Orders</title>
 
-  .status {
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: white;
-    font-weight: bold;
-    text-transform: capitalize;
-  }
+  <style>
+    .orders-container {
+      max-width: 900px;
+      margin: 20px auto;
+      font-family: sans-serif;
+    }
 
-  .status.pending { background: orange; }
-  .status.paid { background: green; }
-  .status.cancelled { background: red; }
-  .status.refunded { background: blue; }
-  .status.delivered { background: darkgreen; }
-</style>
+    .order-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
 
-<title>Seller Orders</title>
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
 
-<div class="orders-container">
-  <h2>Seller Orders</h2>
-  <a href="/seller/dashboard">Seller Dashboard</a><br><br>
+    .item-left {
+      width: 60%;
+    }
 
-  {% for order_id, items in grouped_orders.items() %}
-    <div class="order-card">
-      <div style="width:100%">
+    .item-right {
+      width: 35%;
+      text-align: right;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 10px;
+      text-transform: capitalize;
+    }
+
+    .status.placed { background: orange; }
+    .status.accepted { background: teal; }
+    .status.shipped { background: purple; }
+    .status.delivered { background: darkgreen; }
+    .status.cancelled { background: red; }
+
+    .actions form {
+      margin-bottom: 6px;
+    }
+
+    .actions button {
+      width: 100%;
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      color: white;
+    }
+
+    .btn-accept { background: #007bff; }
+    .btn-ship { background: #6f42c1; }
+    .btn-deliver { background: #28a745; }
+    .btn-cancel { background: #dc3545; }
+  </style>
+</head>
+
+<body>
+  <div class="orders-container">
+    <h2>Seller Orders</h2>
+    <a href="/seller/dashboard">← Seller Dashboard</a>
+    <br><br>
+
+    {% for order_id, items in grouped_orders.items() %}
+      <div class="order-card">
         <h3>Order ID: {{ order_id }}</h3>
 
-        {% for o in items %}
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div>
-              <p>Price: ₹{{ o.price_at_purchase }}</p>
-              <p>Quantity: {{ o.quantity }}</p>
-              <a href="/products/{{ o.product_id }}">View product</a>
+        {% for item in items %}
+          <div class="item-row">
+            <div class="item-left">
+              <p><strong>Price:</strong> ₹{{ item.price_at_purchase }}</p>
+              <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+              <a href="/products/{{ item.product_id }}">View product</a>
             </div>
 
-            <!-- STATUS BADGE -->
-            <span class="status {{ o.status }}">
-              {{ o.status }}
-            </span>
+            <div class="item-right">
+              
+              <div class="status {{ item.status|lower }}">
+                {{ item.status }}
+              </div>
+
+              
+              <div class="actions">
+                {% if item.status|upper == "PLACED" %}
+                  <form method="post" action="/seller/order-item/{{ item.id }}/action">
+                    <input type="hidden" name="action" value="ACCEPT">
+                    <button class="btn-accept">Accept</button>
+                  </form>
+
+                  <form method="post" action="/seller/order-item/{{ item.id }}/action">
+                    <input type="hidden" name="action" value="CANCEL">
+                    <button class="btn-cancel">Cancel</button>
+                  </form>
+                {% endif %}
+
+                {% if item.status|upper == "ACCEPTED" %}
+                  <form method="post" action="/seller/order-item/{{ item.id }}/action">
+                    <input type="hidden" name="action" value="SHIP">
+                    <button class="btn-ship">Mark Shipped</button>
+                  </form>
+                {% endif %}
+
+                {% if item.status|upper == "SHIPPED" %}
+                  <form method="post" action="/seller/order-item/{{ item.id }}/action">
+                    <input type="hidden" name="action" value="DELIVER">
+                    <button class="btn-deliver">Mark Delivered</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
           </div>
-          
         {% endfor %}
       </div>
-    </div>
-  {% else %}
-    <p>No orders.</p>
-  {% endfor %}
-</div>
+    {% else %}
+      <p>No orders.</p>
+    {% endfor %}
+  </div>
+</body>
+</html>

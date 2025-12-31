@@ -135,7 +135,7 @@ class OrderItems(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
     price_at_purchase = Column(Float, nullable=False)
-    status = Column(String, default="PENDING",nullable=False)
+    status = Column(String, default="PLACED",nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 class Cart(Base):

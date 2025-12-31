@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends,Request,Form, File, UploadFile
+from fastapi import APIRouter, Depends,Request,Form, File, UploadFile,HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
@@ -264,4 +264,50 @@ def get_seller_order(request: Request,
             "grouped_orders": grouped_orders
             
         }
+    )
+@router.post("/seller/order-item/{item_id}/action")
+def seller_order_item_action(
+    item_id: int,
+    action: str = Form(...),
+    seller: Seller = Depends(get_current_seller),
+    db: Session = Depends(get_db)
+):
+    item = db.query(OrderItems).filter(
+        OrderItems.id == item_id,
+        OrderItems.seller_id == seller.id
+    ).first()
+
+    if not item:
+        raise HTTPException(404, "Order item not found")
+
+    valid_transitions = {
+        "PLACED": ["ACCEPT", "CANCEL"],
+        "ACCEPTED": ["SHIP", "CANCEL"],
+        "SHIPPED": ["DELIVER"],
+    }
+
+    current_status = item.status
+    action = action.upper()
+
+    if current_status not in valid_transitions:
+        raise HTTPException(400, "Action not allowed")
+
+    if action not in valid_transitions[current_status]:
+        raise HTTPException(400, "Invalid action for this status")
+
+    # apply state change
+    if action == "ACCEPT":
+        item.status = "ACCEPTED"
+    elif action == "SHIP":
+        item.status = "SHIPPED"
+    elif action == "DELIVER":
+        item.status = "DELIVERED"
+    elif action == "CANCEL":
+        item.status = "CANCELLED"
+
+    db.commit()
+
+    return RedirectResponse(
+        "/seller/orders",
+        status_code=302
     )
