@@ -40,6 +40,12 @@ if (order.status === "PLACED"|| order.status === "PAID") {
         <a href="/">Home</a>
     `;
 }
+if (order.status === "CANCELLED") {
+        container.innerHTML += `
+
+        <a href="/">Home</a>
+    `;
+}
 }
 async function cancelOrder(orderId) {
     

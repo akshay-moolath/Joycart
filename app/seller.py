@@ -3,13 +3,13 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from app.db.db import get_db
-from app.db.models import Seller,Product,OrderItems,Order
+from app.db.models import Seller,Product,OrderItems
 from fastapi import BackgroundTasks
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
 import json,os
 from collections import defaultdict
-
+from app.auth import get_current_seller
 
 
 router = APIRouter()
@@ -62,7 +62,7 @@ def register_seller(
     return RedirectResponse("/seller/dashboard", status_code=302)
 
 @pages_router.get("/seller/dashboard")
-def seller_dashboard(request: Request):
+def seller_dashboard(request: Request,seller: Seller = Depends(get_current_seller)):
     return templates.TemplateResponse(
         "seller_dashboard.html",
         {"request": request
@@ -82,7 +82,7 @@ def seller_register_page(request: Request):
 
 
 @pages_router.get("/seller/product/add")
-def seller_register_page(request: Request):
+def seller_product_add(request: Request,seller: Seller = Depends(get_current_seller)):
     return templates.TemplateResponse(
         "seller_product_add.html",
         {"request": request}
@@ -113,15 +113,8 @@ def create_product(
     thumbnail: UploadFile = File(...),
     images: list[UploadFile] = File(...),
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),seller: Seller = Depends(get_current_seller)
 ):
-    current_user = request.state.user
-
-    if not current_user.is_seller:
-        return RedirectResponse("/seller/registerform", status_code=302)
-
-    seller = db.query(Seller).filter(Seller.user_id == current_user.id).first()
-
     
     thumb_result = cloudinary.uploader.upload(
         thumbnail.file,
@@ -229,18 +222,8 @@ def populate_products(db: Session, seller_id: int):
 @pages_router.get("/seller/products")
 def seller_products(
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),seller: Seller = Depends(get_current_seller)
 ):
-    current_user = request.state.user
-
-    if not current_user.is_seller:
-        return RedirectResponse("/seller/registerform", status_code=302)
-
-    seller = (
-        db.query(Seller)
-        .filter(Seller.user_id == current_user.id)
-        .first()
-    )
 
     products = (
         db.query(Product)
@@ -260,18 +243,7 @@ def seller_products(
 ###############seller orders###############
 @pages_router.get('/seller/orders')
 def get_seller_order(request: Request,
-    db: Session = Depends(get_db)):
-
-    current_user = request.state.user
-
-    if not current_user.is_seller:
-        return RedirectResponse("/seller/registerform", status_code=302)
-
-    seller = (
-        db.query(Seller)
-        .filter(Seller.user_id == current_user.id)
-        .first()
-    )
+    db: Session = Depends(get_db),seller: Seller = Depends(get_current_seller)):
     
     orderitems = (
         db.query(OrderItems)

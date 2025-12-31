@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from app.db.db import get_db
-from app.db.models import User
+from app.db.models import User, Seller
 from dotenv import load_dotenv
 
 
@@ -71,3 +71,20 @@ def get_current_user(
     return user
 
 
+def get_current_seller(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    user = request.state.user
+
+    if not user or not user.is_seller:
+        raise HTTPException(status_code=403, detail="Not a seller")
+
+    seller = db.query(Seller).filter(
+        Seller.user_id == user.id
+    ).first()
+
+    if not seller:
+        raise HTTPException(status_code=403, detail="Seller not found")
+
+    return seller
