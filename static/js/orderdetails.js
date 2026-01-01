@@ -23,11 +23,13 @@ async function loadOrder() {
     order.items.forEach(item => {
     let itemHtml = `
         <div style="margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:6px">
+            <img src="${item.thumbnail}" width="100" alt="${item.title}">
             <p><b>${item.title}</b></p>
             <p><b>Price:</b> ₹${item.price}</p>
             <p><b>Qty:</b> ${item.quantity}</p>
             <p><b>Subtotal:</b> ₹${item.subtotal}</p>
             <p><b>Item Status:</b> ${item.status}</p>
+            
     `;
 
     if (["PLACED", "ACCEPTED"].includes(item.status)) {
@@ -66,7 +68,7 @@ async function cancelOrder(orderId) {
     const confirmCancel = confirm("Are you sure you want to cancel this order?");
     if (!confirmCancel) return;
 
-    const res = await fetch(`/api/orders/cancel/${orderId}`, {
+    const res = await fetch(`/api/orders/${orderId}/cancel`, {
         method: "POST",});
 
     if (!res.ok) {

@@ -50,7 +50,8 @@ def get_single_order(request: Request,
                 "price": oi.price_at_purchase,
                 "quantity": oi.quantity,
                 "status": oi.status,
-                "subtotal": oi.price_at_purchase * oi.quantity
+                "subtotal": oi.price_at_purchase * oi.quantity,
+                "thumbnail":product.thumbnail
             }
             for oi, product in items
         ],
