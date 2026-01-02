@@ -20,10 +20,25 @@ if not PAYMENT_WEBHOOK_SECRET:
 
 templates = Jinja2Templates(directory="templates")
 
-@pages_router.get("/checkout/prepaid/confirm")
-def prepaid_payment_page(
+
+@router.post("/checkout/payonline/confirmselected")
+def confirm_payonline_method(
+    request:Request,
+    checkout_id: str = Form(...),
+    method: str = Form(...),
+    amount:str = Form(...)
+):
+    return RedirectResponse(
+        f"/checkout/payonline/gateway?checkout_id={checkout_id}&method={method}&amount={amount}",
+        status_code=302
+    )
+
+
+@pages_router.get("/checkout/payonline/confirm")
+def payonline_payment_page(
     request: Request,
     checkout_id: str,
+    method:str,
     db: Session = Depends(get_db)
 ):
     checkout = db.query(Checkout).filter(
@@ -34,27 +49,30 @@ def prepaid_payment_page(
         raise HTTPException(404)
 
     return templates.TemplateResponse(
-        "prepaid_confirm.html",
+        "payonline_confirm.html",
         {
             "request": request,
             "checkout_id": checkout_id,
-            "amount": checkout.amount
+            "amount": checkout.amount,
+            "method":method
         }
     )
 
-@router.post("/checkout/prepaid/confirm")
-def start_prepaid_payment(
+@router.post("/checkout/payonline/confirm")
+def start_payonline_payment(
     checkout_id: str = Form(...),
+    method:str = Form(...)
 ):
     return RedirectResponse(
-        f"/checkout/prepaid/gateway?checkout_id={checkout_id}",
+        f"/checkout/payonline/gateway?checkout_id={checkout_id}&method={method}",
         status_code=302
     )
 
-@pages_router.get("/checkout/prepaid/gateway")
-def fake_gateway_page(
+@pages_router.get("/checkout/payonline/gateway")
+def payonline_gateway_page(
     request: Request,
-    checkout_id: str
+    checkout_id: str,
+    method:str
 ):
     
     gateway_payment_id = f"PAY-{uuid.uuid4().hex[:12]}"
@@ -62,12 +80,13 @@ def fake_gateway_page(
     signature = generate_signature(payload, PAYMENT_WEBHOOK_SECRET)
 
     return templates.TemplateResponse(
-        "prepaid_gateway.html",
+        "payonline_gateway.html",
         {
             "request": request,
             "checkout_id": checkout_id,
             "signature": signature,
-            "gateway_payment_id":gateway_payment_id
+            "gateway_payment_id":gateway_payment_id,
+            "method":method
         }
     )
 
@@ -77,6 +96,7 @@ def payment_webhook(request:Request,
     payment_status: str = Form(...),
     signature: str = Form(...),
     gateway_payment_id: str = Form(...),
+    method:str =Form(...),
     db: Session = Depends(get_db)
 ):
     current_user = request.state.user
@@ -93,8 +113,6 @@ def payment_webhook(request:Request,
     
     if payment_status != "SUCCESS":
         raise HTTPException(400, "Payment failed")
-    
-    method = "PREPAID"
 
     helper(current_user,db,checkout_id,method,gateway_payment_id)
 
@@ -104,7 +122,7 @@ def payment_webhook(request:Request,
 def payment_success(request:Request):
 
     return templates.TemplateResponse(
-        "prepaid_success.html",
+        "payonline_success.html",
         {
             "request": request
             }

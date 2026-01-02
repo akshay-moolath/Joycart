@@ -249,11 +249,14 @@ def checkout_payment_page(
         }
     )
 
+
+
 @router.post("/checkout/payment")
 def select_payment_method(
     request:Request,
     checkout_id: str = Form(...),
-    payment_method: str = Form(...),
+    method: str = Form(...),
+    amount:str = Form(...),
     db: Session = Depends(get_db)
 ):
     current_user = request.state.user
@@ -266,38 +269,52 @@ def select_payment_method(
     if not checkout:
         raise HTTPException(404)
 
-    checkout.payment_method = payment_method
+    
     db.commit()
 
 
-    if payment_method == "COD":
+    if method == "COD":
         return RedirectResponse(
             f"/checkout/cod/confirm?checkout_id={checkout_id}",
             status_code=302
         )
 
-    
     return RedirectResponse(
-        f"/checkout/prepaid/confirm?checkout_id={checkout_id}",
+        f"/checkout/payonline/select?checkout_id={checkout_id}&method={method}&amount={amount}",
         status_code=302
     )
 
-def lazy_cleanup_checkouts(db):
-    global _last_cleanup
+@pages_router.get("/checkout/payonline/select")
+def select_payonline_method(
+    request:Request,
+    checkout_id: str,
+    method: str,
+    amount:str
+):
+    return templates.TemplateResponse(
+        "payonline_select.html",{
+            "request":request,
+            "checkout_id":checkout_id,
+            "method":method,
+            "amount":amount
+        }
+    )
 
+def lazy_cleanup_checkouts(db):
     now = datetime.utcnow()
 
-
-    if _last_cleanup and now - _last_cleanup < timedelta(minutes=10):
-        return
-
-    db.query(Checkout).filter(
+    expired_checkouts = db.query(Checkout).filter(
         Checkout.expires_at < now
-    ).delete()
+    ).all()
 
-    db.query(CheckoutItem).delete()
+    for checkout in expired_checkouts:
+        
+        db.query(CheckoutItem).filter(
+            CheckoutItem.checkout_id == checkout.id
+        ).delete()
+
+        
+        db.delete(checkout)
 
     db.commit()
-    _last_cleanup = now
-
 

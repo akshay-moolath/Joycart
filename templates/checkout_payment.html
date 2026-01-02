@@ -1,18 +1,17 @@
 <h2>Select Payment Method</h2>
 
-<p><b>Total Amount:</b> ₹{{ amount }}</p>
-
 <form method="post" action="/api/checkout/payment">
   <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-
+  <input type="hidden" name="method" value="{{ method }}">
+  <input type="hidden" name="amount" value="{{ amount}}">
   <div>
-    <input type="radio" id="cod" name="payment_method" value="COD" required>
+    <input type="radio"  name="method" value="COD" required>
     <label for="cod">Cash on Delivery (COD)</label>
   </div>
 
   <div>
-    <input type="radio" id="prepaid" name="payment_method" value="PREPAID">
-    <label for="prepaid">Prepaid (Card / UPI)</label>
+    <input type="radio"  name="method" value="PAYONLINE">
+    <label for="prepaid">Pay Online </label>
   </div>
 
   <br>

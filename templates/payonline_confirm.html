@@ -8,11 +8,13 @@
   <h2>Confirm Payment
 </h2>
 
-  <p><b>Amount to Pay:</b> ₹{{ amount }}</p>
+  <p><b>Amount to Pay:</b> ₹{{ amount | round(2) }}</p>
   <p><b>Checkout ID:</b> {{ checkout_id }}</p>
+  <p><b>Paymenth Method:</b>{{ method }}</p>
 
-  <form method="post" action="/api/checkout/prepaid/confirm">
+  <form method="post" action="/api/checkout/payonline/confirm">
     <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
+    <input type="hidden" name="method" value="{{ method }}">
     <button type="submit"onclick="allowConfirmNavigation()">Go to Payment Page</button>
   </form>
 

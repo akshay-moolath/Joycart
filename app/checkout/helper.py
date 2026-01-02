@@ -4,11 +4,7 @@ from app.db.models import Checkout,Payment,Order,OrderItems,Product,CheckoutItem
 
 def helper(current_user,db,checkout_id,method,gateway_payment_id):
 
-    if method == "COD":
-           order_status = "PLACED"
-           payment_status = "DUE"
-    else:
-           order_status = payment_status = "PAID"
+    order_status = "PLACED"
 
     checkout = db.query(Checkout).filter(
             Checkout.checkout_id == checkout_id,
@@ -30,6 +26,9 @@ def helper(current_user,db,checkout_id,method,gateway_payment_id):
 
     if not checkout_items:
         raise HTTPException(400, "No checkout items")
+    
+    if method not in ["COD", "CARD", "UPI","NETBANKING"]:
+        raise HTTPException(400, "Invalid payment method")
 
     total_amount = 0
     order_items = []
@@ -92,14 +91,14 @@ def helper(current_user,db,checkout_id,method,gateway_payment_id):
         payment = Payment(
                 order_id=order.id,
                 amount=order.amount,
-                status=payment_status,
-                method= method
+                status="DUE",
+                method="COD"
         )
     else:
         payment = Payment(
                 order_id=order.id,
                 amount=order.amount,
-                status=payment_status,
+                status="PAID",
                 method= method,
                 gateway_payment_id = gateway_payment_id
         )

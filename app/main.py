@@ -18,8 +18,8 @@ from app.checkout.checkout import router as checkout_router
 from app.checkout.checkout import pages_router as checkout_pages_router
 from app.checkout.cod import router as cod_router
 from app.checkout.cod import pages_router as cod_pages_router
-from app.checkout.prepaid import router as prepaid_router
-from app.checkout.prepaid import pages_router as prepaid_pages_router
+from app.checkout.payonline import router as prepaid_router
+from app.checkout.payonline import pages_router as prepaid_pages_router
 from app.orders import router as order_router
 from app.orders import pages_router as order_pages_router
 

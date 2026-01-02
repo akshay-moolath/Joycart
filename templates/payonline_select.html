@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Confirmation</title>
+</head>
+<body>
+    <h2>Select Online Payment Method</h2>
+
+<p><b>Total Amount:</b> ₹{{ amount }}</p>
+
+<form method="post" action="/api/checkout/payonline/confirmselected">
+  <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
+  <input type="hidden" name="method" value="{{ method }}">
+  <input type="hidden" name="amount" value="{{ amount }}">
+
+  <div>
+    <input type="radio" name="method" value="UPI" required>
+    <label for="upi">UPI</label>
+  </div>
+
+  <div>
+    <input type="radio" name="method" value="CARD">
+    <label for="card">Card Payment</label>
+  </div>
+
+    <div>
+    <input type="radio" name="method" value="NETBANKING">
+    <label for="netbanking">Net Banking</label>
+  </div>
+
+  <br>
+  <button type="submit">Continue</button>
+</form>
+<br></br>
+  <a href="/checkout/payment?checkout_id={{ checkout_id }}">
+    ← Back to Order Summary
+  </a>
+
+</body>
+</html>
