@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException,Request
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from fastapi.templating import Jinja2Templates
-from app.db.models import Order, OrderItems, Product,Payment
+from app.db.models import Order, OrderItems, Product,Payment, User
+from app.auth import get_current_user
 
 
 router = APIRouter()
@@ -14,10 +15,11 @@ templates = Jinja2Templates(directory="templates")
 @router.get("/{order_id}")
 def get_single_order(request: Request,
     order_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     
 ):
-    current_user = request.state.user
+    
     order = (
         db.query(Order)
         .filter(
@@ -74,9 +76,10 @@ def get_single_order(request: Request,
     return data
 
 @pages_router.get("/orders")
-def get_all_orders(request: Request, db: Session = Depends(get_db)):
+def get_all_orders(request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)):
 
-    current_user = request.state.user 
     
     orders = db.query(Order).filter(Order.user_id ==current_user.id).order_by(Order.created_at.desc()).all()
 
@@ -102,10 +105,11 @@ def order_detail_page(request: Request):
 @router.post("/{order_id}/cancel")
 def cancel_entire_order(request:Request,
     order_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    current_user = request.state.user
+    
 
     order = db.query(Order).filter(
         Order.id == order_id,
@@ -139,10 +143,10 @@ def cancel_entire_order(request:Request,
 @router.post("/item/{item_id}/cancel")
 def cancel_order_item(request:Request,
     item_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    current_user = request.state.user
 
     item = (
         db.query(OrderItems)

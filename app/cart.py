@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request,Form
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.db.db import get_db
-from app.db.models import Cart, CartItem, Product
+from app.auth import get_current_user
+from app.db.models import Cart, CartItem, Product, User
 
 
 router = APIRouter()
@@ -14,9 +15,10 @@ templates = Jinja2Templates(directory="templates")
 def add_to_cart(request:Request,
     product_id: int = Form(...),
     quantity: int = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    current_user = request.state.user
+    
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -56,10 +58,11 @@ def add_to_cart(request:Request,
 
 @router.get("/view")
 def get_cart(request: Request,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     
 ):
-    current_user = request.state.user
+    
     cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
 
     if not cart:
@@ -96,10 +99,11 @@ def get_cart(request: Request,
 def update_quantity(request: Request,
     item_id: int,
     quantity: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     
 ):
-    current_user = request.state.user
+    
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -114,10 +118,11 @@ def update_quantity(request: Request,
 @router.delete("/item/{item_id}")
 def delete_quantity(request: Request,
     item_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     
 ):
-    current_user = request.state.user
+    
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")

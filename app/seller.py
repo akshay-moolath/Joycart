@@ -9,8 +9,9 @@ import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
 import json,os
 from collections import defaultdict
-from app.auth import get_current_seller
+from app.auth import get_current_seller,get_current_user
 from app.orders import restore_stock_for_item,refund_order_item
+from app.db.models import User
 
 
 router = APIRouter()
@@ -31,8 +32,10 @@ cloudinary.config(
 ####################Seller Register##################
 
 @router.get("/seller/check")
-def seller_check(request: Request, db: Session = Depends(get_db)):
-    current_user = request.state.user
+def seller_check(request: Request,
+    current_user: User = Depends(get_current_user), 
+    db: Session = Depends(get_db)):
+    
     if current_user.is_seller:
         return RedirectResponse("/seller/dashboard", status_code=302)
 
@@ -43,10 +46,9 @@ def register_seller(
     request: Request,
     background_tasks: BackgroundTasks,
     store_name: str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
-
     seller = Seller(
         user_id=current_user.id,
         store_name=store_name

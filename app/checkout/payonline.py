@@ -99,8 +99,7 @@ def payment_webhook(request:Request,
     method:str =Form(...),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
-
+    
     payload = f"{checkout_id}|{payment_status}|{gateway_payment_id}"
 
     expected_signature = generate_signature(

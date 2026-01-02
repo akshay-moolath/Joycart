@@ -3,9 +3,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.db import get_db
-from app.db.models import Cart,Product,Checkout,Address,CartItem,CheckoutItem
-from datetime import datetime,timedelta
+from app.db.models import Cart,Product,Checkout,Address,CheckoutItem,User
+from datetime import datetime
 import uuid
+from app.auth import get_current_user
 
 router = APIRouter()
 pages_router = APIRouter()
@@ -19,10 +20,9 @@ templates = Jinja2Templates(directory="templates")
 @router.post("/checkout/start")
 def start_checkout(
     request: Request,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
-
     lazy_cleanup_checkouts(db)
 
     cart = db.query(Cart).filter(
@@ -76,9 +76,9 @@ def buy_now(
     request: Request,
     product_id: int = Form(...),
     quantity: int = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
 
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
@@ -113,10 +113,10 @@ def buy_now(
 def checkout_address_page(
     request: Request,
     checkout_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    current_user = request.state.user
 
     checkout = db.query(Checkout).filter(
         Checkout.checkout_id == checkout_id,
@@ -144,9 +144,10 @@ def save_checkout_address(
     request:Request,
     checkout_id: str = Form(...),
     selected_address_id: int = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
+ 
 
     checkout = db.query(Checkout).filter(
         Checkout.checkout_id == checkout_id,
@@ -181,10 +182,9 @@ def save_checkout_address(
 def checkout_summary(
     request: Request,
     checkout_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
-
     checkout = db.query(Checkout).filter(
         Checkout.checkout_id == checkout_id,
         Checkout.user_id == current_user.id
@@ -229,9 +229,11 @@ def confirm_checkout(
 def checkout_payment_page(
     request: Request,
     checkout_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
+    
+    
     checkout = db.query(Checkout).filter(
         Checkout.checkout_id == checkout_id,
         Checkout.user_id == current_user.id
@@ -257,9 +259,9 @@ def select_payment_method(
     checkout_id: str = Form(...),
     method: str = Form(...),
     amount:str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
 
     checkout = db.query(Checkout).filter(
         Checkout.checkout_id == checkout_id,

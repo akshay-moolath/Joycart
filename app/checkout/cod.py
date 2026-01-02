@@ -4,6 +4,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.db.db import get_db
 from app.checkout.helper import helper
+from app.db.models import User
+from app.auth import get_current_user
 
 
 templates = Jinja2Templates(directory="templates")
@@ -28,9 +30,9 @@ def cod_confirm_page(
 def place_cod_order(
     request: Request,
     checkout_id: str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    current_user = request.state.user
 
     method = "COD"
 
