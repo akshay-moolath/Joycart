@@ -23,7 +23,7 @@ async function loadOrder() {
     order.items.forEach(item => {
     let itemHtml = `
         <div style="margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:6px">
-           <a href ="/products/${item.product.id}" <img src="${item.thumbnail}" width="100" alt="${item.title}"></a>
+           <a href ="/products/${item.product.id}"> <img src="${item.thumbnail}" width="100" alt="${item.title}"></a>
             <p><b>${item.title}</b></p>
             <p><b>Price:</b> ₹${item.price}</p>
             <p><b>Qty:</b> ${item.quantity}</p>
