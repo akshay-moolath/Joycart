@@ -1,11 +1,37 @@
-<h2>Payment Gateway</h2>
+<button id="pay-btn">Pay Now</button>
 
-<form method="post" action="/api/checkout/prepaid/webhook">
-  <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-  <input type="hidden" name="payment_status" value="SUCCESS">
-  <input type="hidden" name="signature" value="{{ signature }}">
-  <input type="hidden" name="gateway_payment_id" value="{{ gateway_payment_id }}">
-  <input type="hidden" name="method" value="{{ method }}">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-  <button type="submit">Simulate Payment Success</button>
-</form>
+<script>
+document.getElementById("pay-btn").onclick = async function () {
+
+  const formData = new FormData();
+  formData.append("checkout_id", "{{ checkout_id }}");
+
+  const res = await fetch("/api/checkout/payonline/create", {
+    method: "POST",
+    body: formData,
+    credentials: "include" 
+  });
+
+  if (!res.ok) {
+    alert("Failed to initiate payment");
+    return;
+  }
+
+  const data = await res.json();
+
+  const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: data.currency,
+    order_id: data.order_id,
+    handler: function () {
+      
+      window.location.href = "/checkout/payonline/waiting";
+    }
+  };
+
+  new Razorpay(options).open();
+};
+</script>

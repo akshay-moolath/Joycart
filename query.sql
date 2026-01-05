@@ -35,4 +35,4 @@ WHERE id BETWEEN 16 AND 30;
 
 
 DROP table sellers
-DROP table products
+DROP table checkouts

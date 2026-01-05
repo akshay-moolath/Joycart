@@ -87,6 +87,10 @@ class Checkout(Base):
 
     amount = Column(Integer, nullable=False)
 
+    status = Column(String,nullable=True)
+
+    gateway_order_id = Column(String, unique=True, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(
         DateTime,
