@@ -7,7 +7,7 @@ from app.db.models import Cart,Product,Checkout,Address,CheckoutItem,User,Order,
 from datetime import datetime
 import uuid, razorpay ,os,hmac,hashlib,json
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import or_
+from decimal import Decimal, ROUND_HALF_UP
 from app.checkout.helper import helper
 from app.auth import get_current_user
 
@@ -384,7 +384,10 @@ def create_payonline_checkout(
     if not checkout_items:
         raise HTTPException(400, "No checkout items")
 
-    amount_paise = int(checkout.amount * 100)
+    amount_paise = int(
+        (Decimal(str(checkout.amount)) * 100)
+        .quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    )
 
     razorpay_order = razorpay_client.order.create({
         "amount": amount_paise,
@@ -479,12 +482,9 @@ def lazy_cleanup_checkouts(db):
     now = datetime.utcnow()
 
     expired_checkouts = db.query(Checkout).filter(
-        Checkout.expires_at < now,
-        or_(
-            Checkout.status.is_(None),
-            Checkout.status != "COMPLETED"
-        )
-    ).all()
+    Checkout.expires_at < now,
+    Checkout.status.in_(["CREATED"])
+).all()
 
     for checkout in expired_checkouts:
         

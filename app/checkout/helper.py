@@ -1,7 +1,8 @@
-from fastapi import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
-from app.db.models import Checkout,Payment,Order,OrderItems,Product,CheckoutItem,Cart,CartItem
 
+from app.db.models import (
+    Checkout, Payment, Order, OrderItems,
+    Product, CheckoutItem, Cart, CartItem
+)
 
 def helper(current_user, db, checkout_id, method, razorpay_payment_id):
     try:
@@ -10,17 +11,17 @@ def helper(current_user, db, checkout_id, method, razorpay_payment_id):
         ).first()
 
         if not checkout:
-            return 
+            raise Exception("Checkout not found")
 
         checkout_items = db.query(CheckoutItem).filter(
             CheckoutItem.checkout_id == checkout.id
         ).all()
 
         if not checkout_items:
-            return  
+            raise Exception("No checkout items")
 
-       
         product_ids = [item.product_id for item in checkout_items]
+
         products = (
             db.query(Product)
             .filter(Product.id.in_(product_ids))
@@ -32,21 +33,16 @@ def helper(current_user, db, checkout_id, method, razorpay_payment_id):
         order_items = []
 
         for item in checkout_items:
-
             product = product_map.get(item.product_id)
 
             if not product:
-                continue
-            
+                raise Exception(f"Product missing: {item.product_id}")
+
             if product.stock < item.quantity:
-                print(
-                    f"⚠️ Stock issue after payment | "
-                    f"product_id={product.id}, "
-                    f"available={product.stock}, "
-                    f"requested={item.quantity}"
+                raise Exception(
+                    f"Stock issue after payment for product {product.id}"
                 )
-                continue
-            
+
             product.stock -= item.quantity
 
             order_items.append(
@@ -58,14 +54,11 @@ def helper(current_user, db, checkout_id, method, razorpay_payment_id):
                     status="PLACED"
                 )
             )
-            if not order_items:
-                print("⚠️ Order created with no items, should refund")
-                return
 
-
+        
         order = Order(
             user_id=current_user.id,
-            amount=checkout.amount,           
+            amount=checkout.amount,
             checkout_id=checkout.checkout_id,
             shipping_address=checkout.shipping_address,
             status="PLACED",
@@ -78,24 +71,24 @@ def helper(current_user, db, checkout_id, method, razorpay_payment_id):
         for oi in order_items:
             oi.order_id = order.id
 
+        
         if method == "COD":
             payment = Payment(
-                    order_id=order.id,
-                    amount=order.amount,
-                    status="PENDING",
-                    method="COD"
+                order_id=order.id,
+                amount=order.amount,
+                status="PENDING",
+                method="COD"
             )
         else:
             payment = Payment(
-            order_id=order.id,
-            amount=order.amount,
-            status="SUCCESS",
-            method = method.upper(),
-            gateway_payment_id=razorpay_payment_id
-        )
-            
-        checkout.status = "COMPLETED"
+                order_id=order.id,
+                amount=order.amount,
+                status="SUCCESS",
+                method=method.upper(),
+                gateway_payment_id=razorpay_payment_id
+            )
 
+        checkout.status = "COMPLETED"
 
         db.add_all(order_items)
         db.add(payment)
@@ -114,10 +107,11 @@ def helper(current_user, db, checkout_id, method, razorpay_payment_id):
             if cart:
                 db.query(CartItem).filter(
                     CartItem.cart_id == cart.id
-                ).delete()
+                ).delete(synchronize_session=False)
 
         db.commit()
 
-    except SQLAlchemyError:
+    except Exception as e:
         db.rollback()
-        
+        print("❌ ORDER / PAYMENT FAILED:", str(e))
+        raise
