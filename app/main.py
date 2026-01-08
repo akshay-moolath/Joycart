@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from app.auth import get_current_user
 from app.db.db import Base, engine,get_db
@@ -29,8 +29,7 @@ Base.metadata.create_all(bind = engine)
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
-
+app.mount('/static',  StaticFiles(directory='static'), name = 'static')
 
 app.include_router(user_router, prefix="/api")
 app.include_router(user_pages_router)
@@ -75,6 +74,9 @@ def joycart(
 def favicon():
     return ""
 
+@app.get("/google2e117fe9b726070f.html")
+def google_verify():
+    return FileResponse("google2e117fe9b726070f.html")
 
 
 
