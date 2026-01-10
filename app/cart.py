@@ -98,6 +98,7 @@ def get_cart(request: Request,
     return {
         "items": items,
         "total": total
+    
     }
 
 
@@ -138,8 +139,53 @@ def delete_quantity(request: Request,
     return {"message": "Item removed"}
 
 @pages_router.get("/cart")
-def viewcart(request: Request):   
+def viewcart(request: Request,
+             current_user: User = Depends(get_current_user)):   
     return templates.TemplateResponse(
         "viewcart.html",
-        {"request":request}
+        {"request":request,
+         "current_user":current_user}
     )
+
+
+
+@pages_router.get("/cart/count")
+def cart_count(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    cart = db.query(User).filter(User.id == current_user.id).first()
+    count = (
+        db.query(CartItem)
+        .filter(CartItem.cart_id== cart.id)
+        .count()
+    )
+    return {"count": count}
+
+
+@pages_router.get("/cart/exist/{product_id}")
+def is_in_cart(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    cart = (
+        db.query(Cart)
+        .filter(Cart.user_id == current_user.id)
+        .first()
+    )
+
+    if not cart:
+        return {"in_cart": False}
+
+    exists = (
+        db.query(CartItem)
+        .filter(
+            CartItem.cart_id == cart.id,
+            CartItem.product_id == product_id
+        )
+        .first()
+        is not None
+    )
+
+    return {"in_cart": exists}

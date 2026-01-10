@@ -1,24 +1,57 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+
 <h2>Select Payment Method</h2>
 
-<p><b>Total Amount:</b> ₹{{ amount | round(2) }}</p>
+<div class="payment-layout">
 
-<form method="post" action="/api/checkout/payment">
-  <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-  <input type="hidden" name="method" value="{{ method }}">
-  <input type="hidden" name="amount" value="{{ amount}}">
-  <div>
-    <input type="radio"  name="method" value="COD" required>
-    <label for="cod">Cash on Delivery (COD)</label>
+
+  <div class="card">
+    <h3>Payment Options</h3>
+
+    <form method="post" action="/api/checkout/payment">
+      <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
+      <input type="hidden" name="amount" value="{{ amount }}">
+
+      <label class="payment-option">
+        <input type="radio" name="method" value="COD" required>
+        <div>
+          <strong>Cash on Delivery</strong>
+          <p class="muted">Pay when your order is delivered</p>
+        </div>
+      </label>
+
+      <label class="payment-option">
+        <input type="radio" name="method" value="PAYONLINE">
+        <div>
+          <strong>Pay Online</strong>
+          <p class="muted">UPI, Card, Netbanking</p>
+        </div>
+      </label>
+
+      <div class="payment-actions">
+        <button type="submit" class="btn btn-primary">
+          Continue
+        </button>
+      </div>
+    </form>
   </div>
 
-  <div>
-    <input type="radio"  name="method" value="PAYONLINE">
-    <label for="prepaid">Pay Online </label>
+
+  <div class="card payment-summary">
+    <h3>Amount Payable</h3>
+
+    <div class="price-row total">
+      <span>Total</span>
+      <span>₹{{ amount | round(2) }}</span>
+    </div>
   </div>
 
-  <br>
-  <button type="submit">Continue</button>
-</form>
-  <a href="/checkout/summary?checkout_id={{ checkout_id }}">
-    ← Back to Order Summary
-  </a>
+</div>
+
+{% endblock %}

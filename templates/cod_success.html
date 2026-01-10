@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="refresh" content="5; url=/orders">
-    <title>Redirecting...</title>
-</head>
-<body>
-    <h1>Order Placed! &#9989;</h1>
-    <p>You will be redirected to order page in 5 seconds. If not, 
-       <a href="/orders">click here</a>.</p>
+
+
+{% extends "base.html" %}
+
+{% block title %}Order Placed{% endblock %}
+
+{% block content %}
+
+
+<meta http-equiv="refresh" content="5; url=/orders">
+
+<div class="success-layout">
+
+  <div class="card success-card">
+    <h2>Order Placed Successfully ✅</h2>
+
+    <p class="success-message">
+      Thank you for your order.<br>
+      You will be redirected to your orders page in 5 seconds.
+    </p>
+
+    <p class="redirect-note">
+      If you are not redirected,
+      <a href="/orders">click here</a>.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}

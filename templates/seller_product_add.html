@@ -1,134 +1,267 @@
 
-<title>Add new Product</title>
-<a href ="/seller/dashboard" style="display: inline;">Dashboard</a><br></br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Product</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<form method="post"
-      action="/seller/product/create"
-      enctype="multipart/form-data">
+  <link rel="stylesheet" href="/static/css/main.css">
 
-    <fieldset>
-        <legend>Basic Product Information</legend>
+  <style>
+    body {
+      background: #f5f7fb;
+    }
 
-        <label>
-            Product Title<br>
+    /* HEADER */
+    .seller-header {
+      background: #111827;
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .seller-header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* PAGE */
+    .seller-form-container {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+    .form-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .form-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #374151;
+      display: block;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .submit-btn {
+      padding: 12px 26px;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .wait-text {
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  
+  <header class="seller-header">
+    <h2>Add New Product</h2>
+    <a href="/seller/dashboard">Dashboard</a>
+  </header>
+
+  <main class="seller-form-container">
+
+    <form method="post"
+          action="/seller/product/create"
+          enctype="multipart/form-data">
+
+      
+      <div class="form-card">
+        <h3>Basic Product Information</h3>
+
+        <div class="form-grid">
+          <label>
+            Product Title
             <input type="text" name="title" required>
-        </label><br><br>
+          </label>
 
-        <label>
-            Description<br>
-            <textarea name="description" rows="4" required></textarea>
-        </label><br><br>
-
-        <label>
-            Category<br>
+          <label>
+            Category
             <input type="text" name="category" required>
-        </label><br><br>
+          </label>
 
-        <label>
-            SKU<br>
+          <label>
+            SKU
             <input type="text" name="sku" required>
+          </label>
+        </div>
+
+        <label style="margin-top:16px;">
+          Description
+          <textarea name="description" rows="4" required></textarea>
         </label>
-    </fieldset>
+      </div>
 
-    <br>
+      
+      <div class="form-card">
+        <h3>Pricing & Availability</h3>
 
-    <fieldset>
-        <legend>Pricing & Availability</legend>
-
-        <label>
-            Price<br>
+        <div class="form-grid">
+          <label>
+            Price
             <input type="number" name="price" step="0.01" required>
-        </label><br><br>
+          </label>
 
-        <label>
-            Discount Percentage<br>
-            <input type="number" name="discountPercentage" step="0.01" value="0">
-        </label><br><br>
+          <label>
+            Discount %
+            <input type="number" name="discountPercentage" step="0.01" value="0" required>
+          </label>
 
-        <label>
-            Stock Quantity<br>
+          <label>
+            Stock
             <input type="number" name="stock" min="0" required>
-        </label><br><br>
+          </label>
 
-        <label>
-            Availability Status<br>
+          <label>
+            Availability
             <select name="availabilityStatus">
-                <option value="In Stock">In Stock</option>
-                <option value="Low Stock">Low Stock</option>
-                <option value="Out of Stock">Out of Stock</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Low Stock">Low Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
             </select>
-        </label><br><br>
+          </label>
 
-        <label>
-            Return Policy<br>
-            <input type="text" name="returnPolicy">
-        </label>
-    </fieldset>
+          <label>
+            Return Policy
+            <input type="text" name="returnPolicy" required>
+          </label>
+        </div>
+      </div>
 
-    <br>
+      
+      <div class="form-card">
+        <h3>Physical & Shipping Details</h3>
 
-    <fieldset>
-        <legend>Physical Details (Optional)</legend>
-
-        <label>
-            Weight (grams)<br>
+        <div class="form-grid">
+          <label>
+            Weight (grams)
             <input type="number" name="weight">
-        </label><br><br>
+          </label>
 
-        <label>
-            Dimensions (cm)<br>
-            Length <input type="number" name="length" step="0.1">
-            Width <input type="number" name="width" step="0.1">
-            Height <input type="number" name="height" step="0.1">
-        </label><br><br>
+          <label>
+            Length (cm)
+            <input type="number" name="length" step="0.1">
+          </label>
 
-        <label>
-            Shipping Information<br>
-            <input type="text" name="shippingInformation">
-        </label><br><br>
+          <label>
+            Width (cm)
+            <input type="number" name="width" step="0.1">
+          </label>
 
-        <label>
-            Warranty Information<br>
-            <input type="text" name="warrantyInformation">
-        </label>
-    </fieldset>
+          <label>
+            Height (cm)
+            <input type="number" name="height" step="0.1">
+          </label>
 
-    <br>
+          <label>
+            Shipping Info
+            <input type="text" name="shippingInformation" required>
+          </label>
 
-    <fieldset>
-        <legend>Upload Product Images</legend>
+          <label>
+            Warranty Info
+            <input type="text" name="warrantyInformation" required>
+          </label>
+        </div>
+      </div>
 
-        <label>
-            Thumbnail 
+      
+      <div class="form-card">
+        <h3>Product Images</h3>
+
+        <div class="form-grid">
+          <label>
+            Thumbnail
             <input type="file" name="thumbnail" accept="image/*" required>
-        </label><br><br>
+          </label>
 
-        <label>
-            Images 
+          <label>
+            Additional Images
             <input type="file" name="images" accept="image/*" multiple required>
-        </label><br><br>
-    </fieldset>
+          </label>
+        </div>
+      </div>
 
-    <br>
+      
+      <div class="form-card">
+        <div class="form-actions">
+          <button type="submit" id="submit-btn" class="submit-btn">
+            Add Product
+          </button>
+          <span id="wait-text" class="wait-text" style="display:none;">
+            Uploading images, please wait…
+          </span>
+        </div>
+      </div>
 
-    <button type="submit" id="submit-btn">
-        Add Product
-    </button>
-    <span id="wait-text" style="display:none;">
-        Please wait, uploading images…
-    </span>
-</form>
+    </form>
+  </main>
+
+  <script>
     
-<script>
-document.querySelector("form").addEventListener("submit", function () {
-    const btn = document.getElementById("submit-btn");
-    const waitText = document.getElementById("wait-text");
+    document.querySelector("form").addEventListener("submit", function () {
+      const btn = document.getElementById("submit-btn");
+      const waitText = document.getElementById("wait-text");
 
-    btn.disabled = true;
-    
-    btn.innerText = "Please wait...";
+      btn.disabled = true;
+      btn.innerText = "Please wait…";
+      waitText.style.display = "inline";
+    });
+  </script>
 
-    waitText.style.display = "inline";
-});
-</script>
-
+</body>
+</html>

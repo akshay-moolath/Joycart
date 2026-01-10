@@ -1,54 +1,54 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Your Cart</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f6f6f6;
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 6px;
-        }
-        .item {
-            display: flex;
-            gap: 20px;
-            border-bottom: 1px solid #ddd;
-            padding: 15px 0;
-        }
-        .item img {
-            width: 100px;
-        }
-        .total {
-            text-align: right;
-            font-size: 20px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
 
-<body>
-<div class="container">
-    <h2>Your Cart</h2>
+{% extends "base.html" %}
 
-    <div id="cart-items"></div>
+{% block title %}Cart{% endblock %}
 
-    <div class="total">
-        <b>Total: ₹ <span id="cart-total">0</span></b><br></br>
-        <button id="order-btn" onclick="checkout()">Place Order</button>
-        <br></br>
-          <a href="/home/">
-    ← Back to Home
+{% block content %}
 
+<h2>Your Cart</h2>
+
+
+<div class="cart-layout">
+
+  <div id="cart-items" class="cart-items card">
+
+  </div>
+
+
+  <div class="cart-summary card">
+    <h3>Order Summary</h3>
+
+    <div class="summary-row">
+      <span>Total</span>
+      <strong>₹ <span id="cart-total">0.00</span></strong>
     </div>
-</div>
 
+    <button
+      id="order-btn"
+      class="btn btn-primary"
+      onclick="checkout()"
+      disabled
+    >
+      Place Order
+    </button>
+  </div>
+</div>
+<div id="remove-confirm" class="modal hidden">
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-box">
+    <p>Remove this item from cart?</p>
+
+    <div class="confirm-actions">
+      <button class="btn btn-danger" id="confirm-remove-btn">
+        Remove
+      </button>
+      <button class="btn btn-outline" onclick="closeRemoveConfirm()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
 <script src="/static/js/viewcart.js"></script>
 
-  </a>
-</body>
-</html>
+{% endblock %}

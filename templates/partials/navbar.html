@@ -1,0 +1,89 @@
+
+<nav class="navbar">
+  <div class="container nav-content">
+
+
+    <a href="{% if current_user %}/home{% else %}/{% endif %}" class="logo">
+      JoyCart
+    </a>
+
+
+    <div class="nav-links">
+
+      {% if current_user %}
+        <!-- ================= LOGGED IN ================= -->
+
+
+        <a href="/cart" class="nav-link cart-link">
+          <svg class="nav-icon" viewBox="0 0 24 24">
+            <path d="M7 4h-2l-1 2h2l3.6 7.6-1.35 2.45a1 1 0 0 0 .9 1.45h12v-2h-10.42a.25.25 0 0 1-.22-.37l.94-1.63h7.72a1 1 0 0 0 .92-.63l3.24-7.37h-14.6l-.94-2z"/>
+          </svg>
+
+          <span class="cart-badge" id="cart-count" hidden>0</span>
+          Cart
+        </a>
+
+     
+        <div class="nav-dropdown">
+
+         
+          <div class="nav-link">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/>
+            </svg>
+            {{ current_user.username }}
+          </div>
+
+          
+          <div class="dropdown-menu">
+
+            <a href="/profile" class="dropdown-item">
+              <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/>
+              </svg>
+              My Profile
+            </a>
+
+            <a href="/orders" class="dropdown-item">
+              <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M3 4h18v2h-18v-2zm0 4h18v12h-18v-12zm2 2v8h14v-8h-14z"/>
+              </svg>
+              My Orders
+            </a>
+
+                <a href="/seller/check" class="dropdown-item">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 2l10 6v8l-10 6-10-6v-8l10-6zm0 2.18l-8 4.8v6.04l8 4.8 8-4.8v-6.04l-8-4.8zm-4 6.82h8v2h-8v-2zm0 4h5v2h-5v-2z"/>
+      </svg>
+      Seller Hub
+    </a>
+
+
+            <form action="/api/logout" method="post" class="dropdown-item logout-form">
+              <button type="submit" class="btn-link">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                  <path d="M16 13v-2h-7v-3l-5 4 5 4v-3h7zm3-10h-8v2h8v14h-8v2h8a2 2 0 0 0 2-2v-14a2 2 0 0 0-2-2z"/>
+                </svg>
+                Logout
+              </button>
+            </form>
+
+          </div>
+        </div>
+
+      {% else %}
+        <!-- ================= LOGGED OUT (LANDING PAGE) ================= -->
+
+        <a href="/login" class="btn btn-outline">
+          Login
+        </a>
+
+        <a href="/register" class="btn btn-primary">
+          Sign Up
+        </a>
+
+      {% endif %}
+
+    </div>
+  </div>
+</nav>

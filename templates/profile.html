@@ -1,16 +1,276 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Profile</title>
-</head>
-<body>
-<h2>My Profile</h2>
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
 
-<hr>
+{% block content %}
 
-<p><b>Username:</b> {{ username }}</p>
-<p><b>Email:</b> {{ email }}</p>
-<p><b>Addresses: </b><a href = '/address'>view</a></p>
+<div class="profile-page">
 
-</body>
-</html>
+  <!-- SIDEBAR -->
+  <div class="profile-sidebar card">
+    <div class="profile-greeting">
+      <div class="avatar">👤</div>
+      <div>
+        <p class="muted">Hello,</p>
+        <strong>{{ username }}</strong>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-title">ACCOUNT SETTINGS</p>
+
+      <a
+        href="/profile"
+        class="sidebar-link {% if section != 'address' %}active{% endif %}"
+      >
+        Profile Information
+      </a>
+
+      <a
+        href="/profile?section=address"
+        class="sidebar-link {% if section == 'address' %}active{% endif %}"
+      >
+        Manage Addresses
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="profile-content">
+
+    {% if section == "address" %}
+
+      <!-- ADDRESSES -->
+      <div class="card">
+
+        <div class="section-header">
+          <h3>My Addresses</h3>
+
+          {% if not add and not edit %}
+            <a href="/profile?section=address&add=1" class="edit-link">
+              + Add Address
+            </a>
+          {% endif %}
+        </div>
+
+        {% if add %}
+          <form method="post" action="/api/address/add">
+            {% include "partials/address_form.html" %}
+
+            <div class="form-actions">
+              <button class="btn btn-primary">Save</button>
+              <a href="/profile?section=address" class="btn btn-outline">
+                Cancel
+              </a>
+            </div>
+          </form>
+
+        {% elif edit and address_to_edit %}
+          <form method="post" action="/api/address/edit/{{ address_to_edit.id }}">
+            {% include "partials/address_form.html" with context %}
+
+            <div class="form-actions">
+              <button class="btn btn-primary">Save</button>
+              <a href="/profile?section=address" class="btn btn-outline">
+                Cancel
+              </a>
+            </div>
+          </form>
+
+        {% else %}
+          {% if addresses %}
+            {% for ad in addresses %}
+              <div class="address-block">
+                <strong>{{ ad.name }}</strong>
+                <p>{{ ad.phone }}</p>
+                <p>{{ ad.address_line1 }}</p>
+                <p>{{ ad.city }}, {{ ad.state }} - {{ ad.pincode }}</p>
+
+                <div class="form-actions">
+                  <a
+                    href="/profile?section=address&edit={{ ad.id }}"
+                    class="btn btn-outline"
+                  >
+                    Edit
+                  </a>
+
+                  <form
+                    method="post"
+                    action="/api/address/delete/{{ ad.id }}"
+                    class="delete-address-form"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      onclick="openAddressDeleteConfirm(this)"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <hr>
+            {% endfor %}
+          {% else %}
+            <p class="muted">No addresses added yet.</p>
+          {% endif %}
+        {% endif %}
+
+      </div>
+
+    {% else %}
+
+      <!-- PROFILE INFO -->
+      <div class="card">
+
+        <div class="section-header">
+          <h3>Profile Information</h3>
+
+          {% if not edit %}
+            <a href="/profile?edit=1" class="edit-link">Edit</a>
+          {% endif %}
+        </div>
+
+        <form
+          id="profile-form"
+          method="post"
+          action="/api/profile/update"
+        >
+
+          <div class="form-row">
+            <label class="profile-label">Username</label>
+            <input
+              type="text"
+              name="username"
+              value="{{ username }}"
+              {% if not edit %}disabled{% endif %}
+            >
+          </div>
+
+          <div class="form-row">
+            <label class="profile-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              value="{{ email }}"
+              {% if not edit %}disabled{% endif %}
+            >
+          </div>
+
+          {% if edit %}
+            <p
+              id="profile-update-error"
+              class="form-error"
+              style="display:none;"
+            ></p>
+
+            <div class="form-actions">
+              <button class="btn btn-primary">
+                Save Changes
+              </button>
+
+              <a href="/profile" class="btn btn-outline">
+                Cancel
+              </a>
+            </div>
+          {% endif %}
+
+        </form>
+      </div>
+
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- ADDRESS DELETE CONFIRM MODAL -->
+<div id="address-delete-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-box">
+    <h4>Delete this address?</h4>
+
+    <p
+      id="address-delete-error"
+      style="display:none;color:#dc2626;font-size:14px;"
+    ></p>
+
+    <p>This action cannot be undone.</p>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="confirm-address-delete">
+        Delete
+      </button>
+      <button class="btn btn-outline" onclick="closeAddressDeleteConfirm()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE SCRIPT -->
+<script>
+  const profileForm = document.getElementById("profile-form");
+
+  if (profileForm) {
+    profileForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const errorEl = document.getElementById("profile-update-error");
+      errorEl.style.display = "none";
+
+      const formData = new FormData(profileForm);
+
+      const res = await fetch(profileForm.action, {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        errorEl.innerText = data.detail || "Update failed";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      window.location.href = "/profile";
+    });
+  }
+
+  let addressDeleteForm = null;
+
+  function openAddressDeleteConfirm(button) {
+    addressDeleteForm = button.closest("form");
+    document.getElementById("address-delete-error").style.display = "none";
+    document.getElementById("address-delete-modal").classList.remove("hidden");
+  }
+
+  function closeAddressDeleteConfirm() {
+    addressDeleteForm = null;
+    document.getElementById("address-delete-modal").classList.add("hidden");
+  }
+
+  document
+    .getElementById("confirm-address-delete")
+    .addEventListener("click", async function () {
+      if (!addressDeleteForm) return;
+
+      const res = await fetch(addressDeleteForm.action, {
+        method: "POST",
+        credentials: "include"
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        const errorEl = document.getElementById("address-delete-error");
+        errorEl.innerText =
+          data.detail || "You must have at least one address";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      window.location.reload();
+    });
+</script>
+
+{% endblock %}

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from app.db.db import get_db
 from app.db.models import Product
+from app.auth import get_current_user_optional
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -12,7 +13,8 @@ templates = Jinja2Templates(directory="templates")
 def product_page(
     request: Request,
     product_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_optional)
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
     
@@ -23,7 +25,8 @@ def product_page(
         "product.html",
         {
             "request": request,
-            "product": product
+            "product": product,
+            "current_user": current_user
         }
     )
 

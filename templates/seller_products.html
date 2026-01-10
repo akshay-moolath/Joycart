@@ -1,75 +1,218 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Seller-Products</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Your Products</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        .card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-        .price {
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        .out {
-            color: red;
-        }
-        .card {
-            position: relative; 
-            transition: transform 0.2s; 
-        }
+  <link rel="stylesheet" href="/static/css/main.css">
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+  <style>
+    body {
+      background: #f5f7fb;
+    }
 
-        .stretched-link::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 1; 
-        }    
-    </style>
+    .seller-header {
+      background: #111827;
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .seller-header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .seller-products-container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .product-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      background: #f9fafb;
+      border-radius: 10px;
+    }
+
+    .product-card h4 {
+      margin: 12px 0 4px;
+      font-size: 16px;
+    }
+
+    .price {
+      font-weight: 600;
+      color: #16a34a;
+      margin-bottom: 10px;
+    }
+
+   
+    .product-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .edit-link {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #c7d2fe;
+      color: #4f46e5;
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .edit-link:hover {
+      background: #eef2ff;
+    }
+
+    .delete-link {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+
+    .delete-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Seller Products</h2>
-<a href = "/seller/dashboard">Dashboard</a><br></br>
-<div class="grid">
-    {% for p in products %}
-        <div class="card">
-    <a href="/products/{{ p.id }}"><img src="{{ p.thumbnail }}" loading="lazy" alt="{{ p.title }}"></a>
-    <h4>{{ p.title }}</h4>
-    <div class="price">₹{{ p.price }}</div>
-    <a href="/seller/products/edit/{{ p.id }}">
-    <button>Edit</button></a><br></br>
-    <form action="/seller/products/delete/{{ p.id }}" method="post">
-    <button>Delete</button></form>
-    
-</div>
-    {% endfor %}
-</div>
+  
+  <header class="seller-header">
+    <h2>Your Products</h2>
+    <a href="/seller/dashboard">Dashboard</a>
+  </header>
+
+
+  <main class="seller-products-container">
+
+    <div class="products-grid">
+      {% for p in products %}
+        <div class="product-card">
+
+          <a href="/products/{{ p.id }}">
+            <img src="{{ p.thumbnail }}" alt="{{ p.title }}">
+          </a>
+
+          <h4>{{ p.title }}</h4>
+          <div class="price">₹ {{ p.price }}</div>
+
+          <div class="product-actions">
+            <a href="/seller/products/edit/{{ p.id }}" class="edit-link">
+              ✏️ Edit
+            </a>
+
+            <button
+              class="delete-link"
+              onclick="openProductDeleteConfirm('{{ p.id }}')"
+            >
+              Delete
+            </button>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+
+  </main>
+
+  
+  <div id="product-delete-confirm" class="modal hidden">
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-box">
+      <p>Delete this product?</p>
+
+      <div class="confirm-actions">
+        <button class="btn btn-danger" id="confirm-product-delete-btn">
+          Delete
+        </button>
+        <button class="btn btn-outline" onclick="closeProductDeleteConfirm()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+
+
+    let deleteProductId = null;
+
+    function openProductDeleteConfirm(productId) {
+      deleteProductId = productId;
+      document
+        .getElementById("product-delete-confirm")
+        .classList.remove("hidden");
+    }
+
+    function closeProductDeleteConfirm() {
+      deleteProductId = null;
+      document
+        .getElementById("product-delete-confirm")
+        .classList.add("hidden");
+    }
+
+    document
+      .getElementById("confirm-product-delete-btn")
+      .addEventListener("click", async function () {
+        if (!deleteProductId) return;
+
+        const res = await fetch(
+          `/seller/products/delete/${deleteProductId}`,
+          {
+            method: "POST",
+            credentials: "include"
+          }
+        );
+
+        if (!res.ok) {
+          alert("Failed to delete product");
+          return;
+        }
+
+        window.location.reload();
+      });
+  </script>
 
 </body>
 </html>

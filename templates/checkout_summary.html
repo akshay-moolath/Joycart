@@ -1,61 +1,122 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Order Summary{% endblock %}
+
+{% block content %}
+
 <h2>Order Summary</h2>
 
-<hr>
+<div class="summary-layout">
 
-<h3>Items</h3>
+ 
+  <div class="summary-left">
+    <div class="card">
+      <h3>Items</h3>
 
-<table border="1" cellpadding="8" cellspacing="0" width="100%">
-  <tr>
-    <th>Product</th>
-    <th>Price</th>
-    <th>Quantity</th>
-    <th>Subtotal</th>
-  </tr>
+      <div class="summary-items">
+        {% for item, product in items %}
+          <div class="summary-item">
+            <img
+              src="{{ product.thumbnail }}"
+              alt="{{ product.title }}"
+              class="summary-thumb"
+            >
 
-{% set ns = namespace(total=0) %}
-{% for item, product in items %}
-  {% set subtotal = (product.price * item.quantity) | round(2) %}
-  {% set ns.total = ns.total + subtotal %}
-  <tr>
-    <td>{{ product.title }}</td>
-    <td>₹{{ product.price }}</td>
-    <td>{{ item.quantity }}</td>
-    <td>₹{{ subtotal }}</td>
-  </tr>
-{% endfor %}
+            <div class="summary-item-info">
+              <strong>{{ product.title }}</strong><br>
+              <strong>₹{{product.price}}</strong>
 
-<tr>
-  <td colspan="3" align="right"><b>Total</b></td>
-  <td><b>₹{{ ns.total | round(2) }}</b></td>
-</tr>
-</table>
+              <p class="return-policy">
+                {{product.returnPolicy}}
+              </p>
 
-<br>
+              <p class="muted">
+                <b>Qty: {{ item.quantity }}</b>
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
-<h3>Shipping Address</h3>
-
-<p>
-  <b>{{ checkout.shipping_address.name }}</b><br>
-  {{ checkout.shipping_address.address_line1 }}<br>
-  {% if checkout.shipping_address.address_line2 %}
-    {{ checkout.shipping_address.address_line2 }}<br>
-  {% endif %}
-  {{ checkout.shipping_address.city }},
-  {{ checkout.shipping_address.state }}<br>
-  Pincode: {{ checkout.shipping_address.pincode }}<br>
-  Phone: {{ checkout.shipping_address.phone }}
-</p>
-
-<hr>
+  <div class="summary-right">
 
 
-<form method="post" action="/api/checkout/confirm">
+    <div class="card address-summary">
+      <h3>Shipping Address</h3>
+
+      <div class="address-summary-content">
+        <p class="address-name">
+          {{ checkout.shipping_address.name }}
+        </p>
+
+        <p>
+          {{ checkout.shipping_address.address_line1 }}<br>
+          {% if checkout.shipping_address.address_line2 %}
+            {{ checkout.shipping_address.address_line2 }}<br>
+          {% endif %}
+          {{ checkout.shipping_address.city }},
+          {{ checkout.shipping_address.state }}<br>
+          Pincode: {{ checkout.shipping_address.pincode }}<br>
+          Phone: {{ checkout.shipping_address.phone }}
+        </p>
+      </div>
+
+      <div class="address-summary-actions">
+        <a
+          href="/checkout/address?checkout_id={{ checkout_id }}"
+          class="btn btn-outline btn-primary-outline"
+        >
+          Change Address
+        </a>
+      </div>
+    </div>
+
+  
+    <div class="card">
+      <h3>Price Details</h3>
+
+      {% set ns = namespace(total=0) %}
+      {% for item, product in items %}
+        {% set subtotal = (product.price * item.quantity) | round(2) %}
+        {% set ns.total = ns.total + subtotal %}
+      {% endfor %}
+
+      <div class="price-row">
+        <span>Items total</span>
+        <span>₹{{ ns.total | round(2) }}</span>
+      </div>
+
+      <div class="price-row muted">
+        <span>Delivery </span>
+        <span>FREE</span>
+      </div>
+
+      <hr>
+
+      <div class="price-row total">
+        <span>Total Payable</span>
+        <span>₹{{ ns.total | round(2) }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<form
+  method="post"
+  action="/api/checkout/confirm"
+  class="summary-actions"
+>
   <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-  <button type="submit">
+
+  <button type="submit" class="btn btn-primary">
     Confirm & Continue to Payment
   </button>
 </form>
-<br></br>
-  <a href="/checkout/address?checkout_id={{ checkout_id }}">
-    ← Back to Address Page
-  </a>
+
+{% endblock %}

@@ -1,51 +1,107 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Processing Payment</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f6f6f6;
-        }
+  <meta charset="UTF-8">
+  <title>Processing Payment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        .box {
-            max-width: 500px;
-            margin: 100px auto;
-            background: #fff;
-            padding: 30px;
-            text-align: center;
-            border-radius: 6px;
-        }
+  <link rel="stylesheet" href="/static/css/main.css">
 
-        .spinner {
-            margin: 20px auto;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #ddd;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+  <style>
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+    .simple-navbar {
+      background: #111827;
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .simple-navbar a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .simple-navbar a:hover {
+      text-decoration: underline;
+    }
+
+
+    body {
+      background: #f5f7fb;
+    }
+
+    .processing-wrapper {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .processing-card {
+      background: #ffffff;
+      padding: 32px;
+      text-align: center;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .processing-card h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .processing-card p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+
+    .spinner {
+      margin: 24px auto;
+      width: 42px;
+      height: 42px;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="box">
-        <h2>Processing your payment</h2>
-        <div class="spinner"></div>
-        <p>Please wait. Do not refresh or close this page.</p>
-    </div>
 
-    <script>
-setTimeout(() => {
-  window.location.href = "/orders";
-}, 5000);
-</script>
+
+  <header class="simple-navbar">
+    <a href="/home">JoyCart</a>
+  </header>
+
+
+  <main class="processing-wrapper">
+    <div class="processing-card">
+      <h2>Processing your payment</h2>
+      <div class="spinner"></div>
+      <p>Please wait. Do not refresh or close this page.</p>
+    </div>
+  </main>
+  <script>
+    setTimeout(() => {
+      window.location.href = "/orders";
+    }, 5000);
+  </script>
 
 </body>
 </html>

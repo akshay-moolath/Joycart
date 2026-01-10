@@ -1,81 +1,130 @@
-async function loadOrder() {
-    const orderId = window.location.pathname.split("/").pop();
-
-    const res = await fetch(`/api/orders/${orderId}`, {});
-
-    const order = await res.json();
-    const container = document.getElementById("order");
-
-    container.innerHTML = `
-        <p><b>Order ID:</b> ${order.id}</p>
-        <p><b>Order Status:</b> ${order.status}</p>
-        <p><b>Total Amount :</b> ₹${order.amount}</p>
-        <p><b>Payment Method :</b> ${order.payment
-    ? `${order.payment.method}<br></br><b>Payment Status:</b> ${order.payment.status} <br></br><b>Payment ID:</b> ${
-        order.payment.gateway_id ?? "N/A"
-      }`
-    : "Not applicable"
-}</p>
-        <hr>
-        <h2>Order Items</h2>
-    `;
-
-    order.items.forEach(item => {
-    let itemHtml = `
-        <div style="margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:6px">
-           <a href ="/products/${item.product_id}"> <img src="${item.thumbnail}" width="100" alt="${item.title}"></a>
-            <p><b>${item.title}</b></p>
-            <p><b>Price:</b> ₹${item.price}</p>
-            <p><b>Qty:</b> ${item.quantity}</p>
-            <p><b>Subtotal:</b> ₹${item.subtotal}</p>
-            <p><b>Item Status:</b> ${item.status}</p>
-            
-    `;
-    let displayStatus = item.status;
-    
-if (item.status === "CANCELLED" && order.payment.status == "PENDING") {
-    displayStatus = "NO REFUND SINCE IT IS A COD ORDER";
-    itemHtml += `<p><b>Refund Status:</b> ${displayStatus}</p>`;
-} if (item.status === "CANCELLED" && item.refund_status) {
-    itemHtml += `<p><b>Refund Status:</b> ${item.refund_status}</p>`;
-}
 
 
+let cancelItemId = null;
 
-    if (["PLACED", "CONFIRMED"].includes(item.status)) {
-        itemHtml += `
-            <button onclick="cancelItem(${item.item_id})">
-                Cancel Item
-            </button>
-        `;
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  loadOrder();
 
-    itemHtml += `</div>`;
+  document
+    .getElementById("close-cancel-btn")
+    .addEventListener("click", closeCancelConfirm);
 
-    container.innerHTML += itemHtml;
+  document
+    .getElementById("confirm-cancel-btn")
+    .addEventListener("click", confirmCancel);
 });
-    container.innerHTML += `
-        <hr>
-        <a href="/">Home</a>
+
+async function loadOrder() {
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  const orderId = parts[1];
+  const itemId = Number(parts[2]);
+
+  const res = await fetch(`/api/orders/${orderId}`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    alert("Failed to load order");
+    return;
+  }
+
+  const order = await res.json();
+  const item = order.items.find(i => i.item_id === itemId);
+
+  if (!item) {
+    alert("Item not found");
+    return;
+  }
+
+ 
+  document.getElementById("order-text").innerHTML = `
+    <h4>${item.title}</h4>
+    <p>Price: ₹${item.price}</p>
+    <p>Quantity: ${item.quantity}</p>
+    <p><strong>Total: ₹${item.subtotal}</strong></p>
+    
+  `;
+
+
+  document.getElementById("order-thumb").innerHTML = `
+    <img src="${item.thumbnail}" alt="${item.title}">
+  `;
+
+
+  document.getElementById("order-status").innerHTML = `
+    <div class="status-row">
+      <span class="status-dot"></span>
+      Order ${item.status}
+    </div>
+  `;
+
+
+  const actions = document.getElementById("order-actions");
+  actions.innerHTML = "";
+
+  if (["PLACED", "CONFIRMED"].includes(item.status)) {
+    actions.innerHTML = `
+      <button class="btn btn-danger"
+        onclick="openCancelConfirm(${item.item_id})">
+        Cancel Order
+      </button>
     `;
-} 
-async function cancelItem(itemId) {
-    const confirmCancel = confirm("Are you sure you want to cancel this item?");
-    if (!confirmCancel) return;
+  }
 
-    const res = await fetch(`/api/orders/item/${itemId}/cancel`, {
-        method: "POST",
-    });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        alert(errorData.detail || "Unable to cancel item");
-        return;
-    }
+  document.getElementById("delivery-box").innerHTML = `
+    <p><b>${order.shipping_address.name}</b></p>
+    <p>${order.shipping_address.address_line1}</p>
+    <p>${order.shipping_address.city},
+       ${order.shipping_address.state} -
+       ${order.shipping_address.pincode}</p>
+    <p>Phone: ${order.shipping_address.phone}</p>
+  `;
 
-    alert("Item cancelled successfully");
-    window.location.reload();
+
+  document.getElementById("payment-box").innerHTML = order.payment
+    ? `
+      <div class="price-row">
+        <span>Payment Method</span>
+        <span>${order.payment.method}</span>
+      </div>
+      <div class="price-row">
+        <span>Status</span>
+        <span>${order.payment.status}</span>
+      </div>
+      <div class="price-row total">
+        <span>Total Paid</span>
+        <span>₹${item.subtotal}</span>
+      </div>
+    `
+    : `<p>Cash on Delivery</p>`;
 }
 
 
-loadOrder();
+
+function openCancelConfirm(itemId) {
+  cancelItemId = itemId;
+  document.getElementById("cancel-confirm-modal").classList.remove("hidden");
+}
+
+function closeCancelConfirm() {
+  cancelItemId = null;
+  document.getElementById("cancel-confirm-modal").classList.add("hidden");
+}
+
+async function confirmCancel() {
+  if (!cancelItemId) return;
+
+  const res = await fetch(`/api/orders/item/${cancelItemId}/cancel`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    alert("Unable to cancel item");
+    closeCancelConfirm();
+    return;
+  }
+
+  window.location.reload();
+}

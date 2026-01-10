@@ -1,88 +1,54 @@
-<style>
-  .address-container {
-    max-width: 900px;
-    margin: 20px auto;
-    font-family: sans-serif;
-  }
 
-  .address-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 15px;
-  }
+{% extends "base.html" %}
 
-  .address-card1  {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    background: #fafafa;
-    
-        
-}
-  .address-card2 {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    background: #fafafa;
-    display: flex;          
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;   
-    text-align: center;     
-    min-height: 150px;     
-}
+{% block title %}Choose Address{% endblock %}
 
-  .address-card p {
-    margin: 4px 0;
-  }
-</style>
+{% block content %}
 
 <h2>Choose delivery address</h2>
 
-<div class="address-container">
-
-  <form action="/api/checkout/address" method="post">
+<form action="/api/checkout/address" method="post">
   <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
 
-    <div class="address-grid">
-      {% for ad in addresses %}
-        <div class="address-card1">
-          <input
-            type="radio"
-            name="selected_address_id"
-            value="{{ ad.id }}"
-            id="addr_{{ ad.id }}"
-            required
-          >
+  <div class="address-grid">
 
-          <label for="addr_{{ ad.id }}">
-            <p><b>Name:</b> {{ ad.name }}</p>
-            <p><b>Phone:</b> {{ ad.phone }}</p>
-            <p><b>Address1:</b> {{ ad.address_line1 }}<br>{{ ad.address_line2 }}</br></p>
-            <p><b>City:</b> {{ ad.city }}</p>
-            <p><b>State:</b> {{ ad.state }}</p>
-            <p><b>Pincode:</b> {{ ad.pincode }}</p>
-          </label>
+    {% for ad in addresses %}
+      <label class="address-card card">
+        <input
+          type="radio"
+          name="selected_address_id"
+          value="{{ ad.id }}"
+          required
+        >
+
+        <div class="address-info">
+          <p><strong>{{ ad.name }}</strong></p>
+          <p>{{ ad.phone }}</p>
+          <p>
+            {{ ad.address_line1 }}<br>
+            {{ ad.address_line2 }}
+          </p>
+          <p>{{ ad.city }}, {{ ad.state }} - {{ ad.pincode }}</p>
         </div>
-      {% endfor %}
-    <div class="address-card2">
-    <a href="/address/add?checkout_id={{ checkout_id }}">
-  Add new address
-</a>
-    </div>
-    </div>
+      </label>
+    {% endfor %}
 
-    <br></br>
-    <button type="submit" class="continue-btn">
+    <a
+      href="/address/add?checkout_id={{ checkout_id }}"
+      class="address-card card add-address"
+    >
+      + Add new address
+    </a>
+
+  </div>
+
+  <div class="address-actions">
+    <button type="submit" class="btn btn-primary">
       Continue
     </button>
 
-  </form>
-    <a href="/cart/">
-    ← Back to Cart
-  </a>  |
-  <a href="/home/">
-    Home
-  </a>
+  </div>
 
-</div>
+</form>
+
+{% endblock %}

@@ -1,37 +1,140 @@
-<button id="pay-btn">Pay Now</button>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complete Payment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script>
-document.getElementById("pay-btn").onclick = async function () {
 
-  const formData = new FormData();
-  formData.append("checkout_id", "{{ checkout_id }}");
+  <link rel="stylesheet" href="/static/css/main.css">
 
-  const res = await fetch("/api/checkout/payonline/create", {
-    method: "POST",
-    body: formData,
-    credentials: "include" 
-  });
+  <style>
 
-  if (!res.ok) {
-    alert("Failed to initiate payment");
-    return;
-  }
-
-  const data = await res.json();
-
-  const options = {
-    key: data.key,
-    amount: data.amount,
-    currency: data.currency,
-    order_id: data.order_id,
-    handler: function () {
-      
-      window.location.href = "/checkout/payonline/waiting";
+    .simple-navbar {
+      background: #111827;
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-  };
 
-  new Razorpay(options).open();
-};
-</script>
+    .simple-navbar a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .simple-navbar a:hover {
+      text-decoration: underline;
+    }
+
+
+    .payment-wrapper {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f5f7fb;
+      padding: 24px;
+    }
+
+    .payment-card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .payment-card h2 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .payment-card p {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .pay-btn:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <header class="simple-navbar">
+    <a href="/home">JoyCart</a>
+  </header>
+
+
+  <main class="payment-wrapper">
+    <div class="payment-card">
+      <h2>Complete Your Payment</h2>
+      <p>You will be redirected to the secure payment gateway.</p>
+
+      <button id="pay-btn" class="pay-btn">
+        Pay Now
+      </button>
+    </div>
+  </main>
+
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+
+    document.getElementById("pay-btn").onclick = async function () {
+
+      const formData = new FormData();
+      formData.append("checkout_id", "{{ checkout_id }}");
+
+      const res = await fetch("/api/checkout/payonline/create", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+
+      if (!res.ok) {
+        alert("Failed to initiate payment");
+        return;
+      }
+
+      const data = await res.json();
+
+      const options = {
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.order_id,
+        handler: function () {
+          window.location.href = "/checkout/payonline/waiting";
+        }
+      };
+
+      new Razorpay(options).open();
+    };
+  </script>
+
+</body>
+</html>

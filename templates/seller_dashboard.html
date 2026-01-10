@@ -1,22 +1,154 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Seller Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Seller Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/static/css/main.css">
+
+  <style>
+    body {
+      background: #f5f7fb;
+    }
+
+    
+    .seller-header {
+      background: #111827;
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .seller-header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .seller-header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .seller-header a:hover {
+      text-decoration: underline;
+    }
+
+
+    .seller-container {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .seller-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .seller-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .seller-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    }
+
+    .seller-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 14px;
+      color: #4f46e5;
+    }
+
+    .seller-card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .seller-card p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .seller-card a {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .seller-card a:hover {
+      background: #4338ca;
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
+  
+  <header class="seller-header">
     <h1>Seller Dashboard</h1>
-    <nav>
-        <a href="/seller/product/add">Add Product</a> |
-        <a href="/seller/products">My Products</a> |
-        <a href="/seller/orders">Orders</a> |
-        <a href="/">Home</a>
-    </nav>
-    <hr>
-</header>
+    <a href="/home">Home</a>
+  </header>
+
+  
+  <main class="seller-container">
+    <div class="seller-grid">
+
+      
+      <div class="seller-card">
+        <svg class="seller-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 4h18v2H3V4zm0 4h18v14H3V8zm2 2v10h14V10H5z"/>
+        </svg>
+        <h2>Orders</h2>
+        <p>View and manage customer orders</p>
+        <a href="/seller/orders">View Orders</a>
+      </div>
+
+      
+      <div class="seller-card">
+        <svg class="seller-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        <h2>Your Products</h2>
+        <p>Manage your listed products</p>
+        <a href="/seller/products">View Products</a>
+      </div>
+
+    
+      <div class="seller-card">
+        <svg class="seller-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h2>Add Product</h2>
+        <p>Add a new product to your store</p>
+        <a href="/seller/product/add">Add Product</a>
+      </div>
+
+    </div>
+  </main>
+
 </body>
 </html>

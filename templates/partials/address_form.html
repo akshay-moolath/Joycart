@@ -1,0 +1,30 @@
+
+
+</style>
+<label>Name
+  <input name="name" value="{{ address_to_edit.name if address_to_edit else '' }}" required>
+</label>
+
+<label>Phone
+  <input name="phone" value="{{ address_to_edit.phone if address_to_edit else '' }}" required>
+</label>
+
+<label>Address Line 1
+  <input name="address_line1" value="{{ address_to_edit.address_line1 if address_to_edit else '' }}" required>
+</label>
+
+<label>Address Line 2
+  <input name="address_line2" value="{{ address_to_edit.address_line2 if address_to_edit else '' }}">
+</label>
+
+<label>City
+  <input name="city" value="{{ address_to_edit.city if address_to_edit else '' }}" required>
+</label>
+
+<label>State
+  <input name="state" value="{{ address_to_edit.state if address_to_edit else '' }}" required>
+</label>
+
+<label>Pincode
+  <input name="pincode" value="{{ address_to_edit.pincode if address_to_edit else '' }}" required>
+</label>

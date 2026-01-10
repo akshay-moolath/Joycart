@@ -1,29 +1,33 @@
-<html>
-<body>
-<h2>Confirm Cash on Delivery</h2>
 
-<p>Are you sure you want to place this order with Cash on Delivery?</p>
+{% extends "base.html" %}
 
-<form method="post" action="/api/checkout/cod/confirm">
-  <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
-  <button type="submit" onclick="allowConfirmNavigation()">Place Order</button>
-</form>
-  <a href="/checkout/summary?checkout_id={{ checkout_id }}">
-    ← Back to Order Summary
-  </a>
-  <script>
-  let allowNavigation = false;
+{% block title %}Confirm Order{% endblock %}
 
-  window.addEventListener("beforeunload", function (e) {
-    if (!allowNavigation) {
-      e.preventDefault();
-      e.returnValue = "";
-    }
-  });
+{% block content %}
 
-  function allowConfirmNavigation() {
-    allowNavigation = true;
-  }
-</script>
-</body>
-</html>
+<div class="cod-confirm-layout">
+
+  <div class="card cod-confirm-card">
+    <h2>Confirm Cash on Delivery</h2>
+
+    <p class="cod-message">
+      You have selected <strong>Cash on Delivery</strong> as your payment method.
+      Please confirm to place your order.
+    </p>
+
+    <form method="post" action="/api/checkout/cod/confirm">
+      <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
+
+      <div class="cod-actions">
+        <button type="submit" class="btn btn-primary">
+          Place Order
+        </button>
+
+
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

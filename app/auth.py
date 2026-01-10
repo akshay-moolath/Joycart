@@ -52,14 +52,14 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     data = decode_token(token)
-    username = data.get("sub")
+    user_id= data.get("sub")
 
-    if not username:
+    if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
     user = (
         db.query(User)
-        .filter(User.username == username)
+        .filter(User.id == int(user_id))
         .first()
     )
 
@@ -70,6 +70,15 @@ def get_current_user(
     
     return user
 
+
+def get_current_user_optional(
+    request: Request,
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    try:
+        return get_current_user(request=request, db=db)
+    except:
+        return None
 
 def get_current_seller(
     request: Request,

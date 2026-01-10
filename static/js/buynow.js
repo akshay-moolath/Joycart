@@ -1,6 +1,6 @@
 document.getElementById("buy-btn").addEventListener("click", async function () {
     const productId = this.dataset.productId;
-    const quantity = document.getElementById("qty").value;
+    const quantity = 1;
 
     const formData = new FormData();
     formData.append("product_id", productId);

@@ -16,13 +16,15 @@ pages_router = APIRouter()
 @pages_router.get("/checkout/cod/confirm")
 def cod_confirm_page(
     request: Request,
-    checkout_id: str
+    checkout_id: str,
+    current_user: User = Depends(get_current_user)    
 ):
     return templates.TemplateResponse(
         "cod_confirm.html",
         {
             "request": request,
-            "checkout_id": checkout_id
+            "checkout_id": checkout_id,
+            "current_user":get_current_user
         }
     )
 
@@ -44,8 +46,10 @@ def place_cod_order(
     )
 
 @pages_router.get("/checkout/cod/success")
-def cod_order_success(request:Request):
+def cod_order_success(request:Request,
+    current_user: User = Depends(get_current_user)):
     return templates.TemplateResponse(
         "cod_success.html",
-        {"request":request}
+        {"request":request,
+         "current_user":current_user}
     )

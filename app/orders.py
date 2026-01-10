@@ -42,12 +42,14 @@ def get_single_order(request: Request,
         .filter(OrderItems.order_id == order.id)
         .all()
     )
+
     data = {
         "id": order.id,
         "amount": order.amount,
         "currency": order.currency,
         "status": order.status,
         "created_at": order.created_at,
+        "shipping_address":order.shipping_address,
         "items": [
     {
         "item_id": oi.id,
@@ -89,27 +91,50 @@ def get_single_order(request: Request,
     return data
 
 @pages_router.get("/orders")
-def get_all_orders(request: Request,
+def get_all_order_items(
+    request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db)
+):
+    rows = (
+        db.query(OrderItems, Order, Product)
+        .join(Order, Order.id == OrderItems.order_id)
+        .join(Product, Product.id == OrderItems.product_id)
+        .filter(Order.user_id == current_user.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
 
-    
-    orders = db.query(Order).filter(Order.user_id ==current_user.id).order_by(Order.created_at.desc()).all()
+    order_items = [
+        {   
+            "item_id":oi.id,
+            "order_id": order.id,
+            "title": product.title,
+            "thumbnail": product.thumbnail,
+            "quantity": oi.quantity,
+            "status": oi.status,
+            "subtotal": f"{oi.price_at_purchase * oi.quantity:.2f}",
+            "placed_at": order.created_at.strftime("%b %d, %Y"),
+        }
+        for oi, order, product in rows
+    ]
 
     return templates.TemplateResponse(
         "orders.html",
         {
-            "request": request, 
-            "orders": orders
-            
+            "request": request,
+            "order_items": order_items,
+            "current_user": current_user
         }
     )
 
-@pages_router.get("/orders/{order_id}")
-def order_detail_page(request: Request):
+@pages_router.get("/orders/{order_id}/{item_id}")
+def order_detail_page(request: Request,
+    current_user: User = Depends(get_current_user)):
     return templates.TemplateResponse(
         "orderdetails.html",
-        {"request": request}
+        {"request": request,
+         "current_user":current_user}
     )
 
 

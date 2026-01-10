@@ -23,22 +23,36 @@ async function loadCart() {
    
     let itemsHtml = "";
     data.items.forEach(item => {
-        itemsHtml += `
-            <div class="item">
-                <a href = "/products/${item.product_id}"><img src="${item.thumbnail}" alt=""></a>
-                <div>
-                    <h4>${item.title}</h4>
-                    <p>Price: ₹ ${item.price}</p>
-                    <p>Quantity:
-                        <button onclick="changeQty(${item.id}, ${item.quantity - 1})">−</button>
-                        <span style="margin: 0 10px">${item.quantity}</span>
-                        <button onclick="changeQty(${item.id}, ${item.quantity + 1})">+</button>
-                    </p>
-                    <p>Remove Item:<button onclick="removeItem(${item.id})">X</button></p>
-                    <p><b>Subtotal:</b> ₹ ${item.subtotal}</p>
-                </div>
-            </div>
-        `;
+            itemsHtml += `
+                        <div class="item">
+                            <a href="/products/${item.product_id}">
+                            <img src="${item.thumbnail}" alt="">
+                            </a>
+
+                            <div class="item-details">
+                            <h4>${item.title}</h4>
+
+                            <p>Price: ₹ ${item.price}</p>
+
+                            <p>
+                                Quantity:
+                                <span class="qty-control">
+                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})">−</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="changeQty(${item.id}, ${item.quantity + 1})">+</button>
+                                </span>
+                            </p>
+
+                            <p><b>Subtotal:</b> ₹ ${item.subtotal}</p>
+                            <button
+                                class="link-btn danger remove-btn"
+                                onclick="openRemoveConfirm(${item.id})"
+                            >
+                                REMOVE
+                            </button>
+                            </div>
+                        </div>
+                        `;
     });
 
     
@@ -49,8 +63,7 @@ async function loadCart() {
 }
 async function changeQty(itemId, newQty) {
     if (newQty < 1) {
-        alert("Quantity cannot be less than 1");
-        return;
+    return;
     }
 
    
@@ -66,6 +79,8 @@ async function changeQty(itemId, newQty) {
 
     loadCart(); 
 }
+
+
 async function removeItem(itemId) {
 
     
@@ -95,10 +110,33 @@ async function checkout() {
     }
 
     const data = await res.json();
-   /* alert(
-        `Order placed!\nOrder ID: ${data.order_id}\nAmount: ₹${data.amount}`
-    );*/
+
     window.location.href = data.redirect_url;
 }
+let removeItemId = null;
 
-document.addEventListener("DOMContentLoaded", loadCart);
+function openRemoveConfirm(itemId) {
+  removeItemId = itemId;
+  document.getElementById("remove-confirm").classList.remove("hidden");
+}
+
+function closeRemoveConfirm() {
+  removeItemId = null;
+  document.getElementById("remove-confirm").classList.add("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCart();
+
+  const confirmBtn = document.getElementById("confirm-remove-btn");
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", () => {
+      if (removeItemId) {
+        removeItem(removeItemId);
+        closeRemoveConfirm();
+      }
+    });
+  }
+});
+
+

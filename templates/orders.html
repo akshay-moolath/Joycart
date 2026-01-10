@@ -1,40 +1,48 @@
-<style>
-  .orders-container {
-    max-width: 800px;
-    margin: 20px auto;
-    font-family: sans-serif;
-  }
-  
-  .order-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+{% extends "base.html" %}
 
-</style>
-<title>Orders</title>
-<div class="orders-container">
-  <h2>Your Orders</h2>
-  <a href ='/'>Home</a><br></br>
-  {% for o in orders %}
-  <div class="order-card">
-    <div>
-      <strong>Order ID: {{ o.id }}</strong>
-      <p style="color: #666; margin: 5px 0;">Date: {{ o.created_at.strftime('%Y-%m-%d') }}</p>
-      <p>Amount: ₹{{ o.amount }}</p>
-      <a href="/orders/{{o.id}}">View details</a> 
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+
+
+
+<div class="orders-list">
+
+  {% for item in order_items %}
+  <div class="order-item-card">
+
+
+  <div class="order-thumb">
+    <img src="{{ item.thumbnail }}">
+  </div>
+
+
+  <div class="order-info">
+    <h4>{{ item.title }}</h4>
+    <p class="muted">Qty: {{ item.quantity }}</p>
+  </div>
+
+
+  <div class="order-price">
+    ₹ {{ item.subtotal }}
+  </div>
+
+
+  <div class="order-meta">
+    <div class="order-status {{ item.status|lower }}">
+      ● {{ item.status }}
     </div>
 
+    <div class="order-date">
+      {{ item.placed_at }}
+    </div>
   </div>
-  
-  
-    
-  
-  {% else %}
-    <p>You haven't placed any orders yet.</p>
-  {% endfor %}
+
+
+  <a href="/orders/{{item.order_id}}/{{item.item_id}}" class="stretched-link"></a>
+
 </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

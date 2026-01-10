@@ -1,8 +1,55 @@
-<h2>Order Details</h2>
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock %}
 
-<div id="order"></div>
+{% block content %}
 
-<script>
-const orderId = window.location.pathname.split("/").pop();
-</script>
+<div class="order-details-layout">
+
+  
+  <div class="card order-detail-card" id="order-left">
+
+    <div class="order-top">
+      <div class="order-text" id="order-text"></div>
+      <div class="order-thumb" id="order-thumb"></div>
+    </div>
+
+    <div class="order-status-section" id="order-status"></div>
+
+    <div class="order-footer">
+      
+      <div class="order-actions" id="order-actions"></div>
+    </div>
+
+  </div>
+
+  
+  <div class="order-right">
+    <div class="card">
+      <h3>Delivery details</h3>
+      <div id="delivery-box"></div>
+    </div>
+
+    <div class="card">
+      <h3>Payment details</h3>
+      <div id="payment-box"></div>
+    </div>
+  </div>
+
+</div>
+
+
+<div id="cancel-confirm-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <h4>Cancel this order?</h4>
+    <p>This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="confirm-cancel-btn">Yes, Cancel</button>
+      <button class="btn btn-outline" id="close-cancel-btn">No</button>
+    </div>
+  </div>
+</div>
+
 <script src="/static/js/orderdetails.js"></script>
+
+{% endblock %}

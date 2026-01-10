@@ -67,7 +67,9 @@ def joycart(
 
     return templates.TemplateResponse(
         "joycart.html",
-        {"request": request, "products": products}
+        {"request": request,
+        "products": products,
+        "current_user": None}
     )
     
 @app.get("/favicon.ico")#added to remove favicon error

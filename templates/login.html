@@ -1,27 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joycart Login</title>
-</head>
-<body>
-        <h1>Joycart Login</h1>
-        <p>Log in your joycart account</p>
-                <form action="/api/login" method="POST">
-                    <div>
-                        <label for="username">Username</label>
-                        <input id="username" name="username" type="text" placeholder="Enter your username" required autocomplete="username" />
-                    </div>
 
-                    <div>
-                        <label for="password">Password</label>
-                        <input id="password" name="password" type="password" placeholder="••••••••" required autocomplete="current-password" />
-                    </div>
 
-                    <button type="submit">Log In</button>
-                </form>
-                Don't have an account?
-                <a href="/register">Create one</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Login | JoyCart{% endblock %}
+
+{% block content %}
+
+<div class="auth-page">
+
+  <div class="card auth-card">
+
+    <div class="auth-header">
+      <h2>Welcome back 👋</h2>
+      <p class="muted">Log in to your JoyCart account</p>
+    </div>
+
+    <form action="/api/login" method="POST">
+
+      <div class="form-row">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          placeholder="Enter your username"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-row">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-full">
+        Log In
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      Don’t have an account?
+      <a href="/register">Create one</a>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

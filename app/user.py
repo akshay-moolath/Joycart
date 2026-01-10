@@ -49,7 +49,8 @@ def register(request: Request):
 
     return templates.TemplateResponse(
         "register.html",
-        {"request": request}
+        {"request": request,
+         "current_user": None}
     )
 
 ############################LOGIN AND LOGOUT#################################
@@ -69,7 +70,7 @@ def login_user( username: str = Form(...),
             status_code=302
         )
 
-    token = create_access_token({"sub": user.username})
+    token = create_access_token({"sub": str(user.id)})
 
     response = RedirectResponse(
         "/home",
@@ -97,7 +98,8 @@ def login(request: Request):
 
     return templates.TemplateResponse(
         "login.html",
-        {"request": request}
+        {"request": request,
+         "current_user": None}
     )
 
 @router.post("/logout")
@@ -108,7 +110,6 @@ def logout():
 
 ##########################DASHBOARD AND PROFILE###############################
 
-# file: user.py (or wherever /home is)
 
 @pages_router.get("/home", dependencies=[Depends(get_current_user)])
 def home(
@@ -117,6 +118,8 @@ def home(
     db: Session = Depends(get_db)
 ):
     products = list_products(db)
+
+    user = db.query(User).filter(User.id == current_user.id).first()
 
     if current_user.is_seller:
         seller = (
@@ -135,7 +138,8 @@ def home(
         "home.html",
         {
             "request": request,
-            "products": products
+            "products": products,
+            "current_user": current_user
         }
     )
 
@@ -144,21 +148,84 @@ def home(
 @pages_router.get("/profile")
 def profile(
     request: Request,
-    current_user = Depends(get_current_user)
+    section: str | None = None,
+    add: bool = False,
+    edit: int | None = None,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
+    addresses = []
+    address_to_edit = None
+
+    if section == "address":
+        addresses = (
+            db.query(Address)
+            .filter(Address.user_id == current_user.id)
+            .all()
+        )
+
+        if edit:
+            address_to_edit = (
+                db.query(Address)
+                .filter(
+                    Address.id == edit,
+                    Address.user_id == current_user.id
+                )
+                .first()
+            )
+
     return templates.TemplateResponse(
         "profile.html",
         {
             "request": request,
             "username": current_user.username,
-            "email": current_user.email
+            "email": current_user.email,
+            "section": section,
+            "add": add,
+            "edit": edit,
+            "addresses": addresses,
+            "address_to_edit": address_to_edit,
+            "current_user":current_user
         }
     )
+@router.post("/profile/update")
+def update_profile(
+    username: str = Form(None),
+    email: str = Form(None),
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == current_user.id).first()
+
+    
+    if username and username != user.username:
+        existing_user = db.query(User).filter(User.username == username).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username already taken")
+        user.username = username
+
+    
+    if email and email != user.email:
+        existing_email = db.query(User).filter(User.email == email).first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        user.email = email
+
+    db.commit()
+
+    return RedirectResponse(
+        url="/profile",
+        status_code=303
+    )
+    
+
+
 
 ################################ ADD,DELETE AND EDIT ADDRESS#############################
 
 @router.post("/address/add")
-def add_address(current_user: User = Depends(get_current_user),
+def add_address(
+    current_user: User = Depends(get_current_user),
     name: str = Form(...),
     phone: str = Form(...),
     address_line1: str = Form(...),
@@ -167,10 +234,9 @@ def add_address(current_user: User = Depends(get_current_user),
     state: str = Form(...),
     pincode: str = Form(...),
     is_default: bool = Form(False),
-    redirect_to: str = Form(None),
     db: Session = Depends(get_db)
 ):
-
+    
     if is_default:
         db.query(Address).filter(
             Address.user_id == current_user.id,
@@ -193,31 +259,9 @@ def add_address(current_user: User = Depends(get_current_user),
     db.commit()
 
     return RedirectResponse(
-        redirect_to or "/address",
-        status_code=302
+        "/profile?section=address",
+        status_code=303
     )
-
-@pages_router.get('/address/add', dependencies=[Depends(get_current_user)])
-def add_address(request: Request,
-                checkout_id: str | None = None):
-    return templates.TemplateResponse(
-        "address_add.html",
-        {"request":request,
-         "checkout_id": checkout_id}
-        )
-
-@pages_router.get("/address")
-def get_address(request:Request,current_user: User = Depends(get_current_user),db:Session=Depends(get_db)):
-
-    addresses = db.query(Address).filter(Address.user_id ==current_user.id).all()
-
-    return templates.TemplateResponse(
-        "address.html",{
-            'request':request,
-            'addresses':addresses
-        }
-    )
-
 
 @router.post("/address/edit/{address_id}")
 def edit_address(
@@ -248,30 +292,8 @@ def edit_address(
     
     db.commit()
 
-    return RedirectResponse("/address", status_code=302)
+    return RedirectResponse("/profile?section=address", status_code=302)
 
-@pages_router.get("/address/edit/{address_id}")
-def edit_address_page(
-    address_id: int,
-    request: Request,
-    current_user = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    address = db.query(Address).filter(
-        Address.id == address_id,
-        Address.user_id == current_user.id
-    ).first()
-
-    if not address:
-        raise HTTPException(status_code=404)
-
-    return templates.TemplateResponse(
-        "address_edit.html",
-        {
-            "request": request,
-            "address": address
-        }
-    )
 
 @router.post("/address/delete/{address_id}")
 def delete_address(
@@ -300,7 +322,10 @@ def delete_address(
     db.delete(address)
     db.commit()
 
-    return RedirectResponse("/address", status_code=302)
+    return RedirectResponse(
+        "/profile?section=address",
+        status_code=303
+    )
 
 
 
