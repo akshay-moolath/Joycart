@@ -311,7 +311,8 @@ def checkout_payment_page(
         {
             "request": request,
             "checkout_id": checkout_id,
-            "amount": checkout.amount
+            "amount": checkout.amount,
+            "current_user":current_user
         }
     )
 
