@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+
+{% block title %}Add Delivery Address{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+  <div class="section-header">
+    <h3>Add Delivery Address</h3>
+  </div>
+
+
+<form method="post" action="/api/address/add">
+    {% if checkout_id %}
+    <input
+      type="hidden"
+      name="redirect_to"
+      value="/checkout/address?checkout_id={{ checkout_id }}"
+    >
+  {% endif %}
+
+  {% include "partials/address_form.html" %}
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      Save & Continue
+    </button>
+      Cancel
+    </a>
+  </div>
+
+</form>
+
+{% endblock %}

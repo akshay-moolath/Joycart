@@ -234,7 +234,9 @@ def add_address(
     state: str = Form(...),
     pincode: str = Form(...),
     is_default: bool = Form(False),
+    redirect_to: str = Form(None),
     db: Session = Depends(get_db)
+    
 ):
     
     if is_default:
@@ -258,10 +260,22 @@ def add_address(
     db.add(address)
     db.commit()
 
-    return RedirectResponse(
+    return RedirectResponse(redirect_to or
         "/profile?section=address",
         status_code=303
     )
+
+@pages_router.get('/address/add')
+def add_address(request: Request,
+                checkout_id: str | None = None,
+                current_user = Depends(get_current_user)):
+    return templates.TemplateResponse(
+        "checkout_address_add.html",
+        {"request":request,
+         "checkout_id": checkout_id,
+         "current_user":current_user}
+        )
+
 
 @router.post("/address/edit/{address_id}")
 def edit_address(
