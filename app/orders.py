@@ -188,14 +188,14 @@ def cancel_order_item(
                 status="NO_REFUND_FOR_COD_ORDERS",
                 orderitem_id=item.id
             )
-                
+                payment.status = "NOT_REQUIRED"  
                 db.add(refund)
         
         else:
             refund = create_refund_record(item,payment,db)
             db.flush()   
             initiate_razorpay_refund(refund, db)
-        payment.status = "NOT_REQUIRED"
+            
         db.commit()
         return {"message": "Item cancelled"}
 
