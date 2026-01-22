@@ -19,7 +19,7 @@ async function loadOrder() {
   const orderId = parts[1];
   const itemId = Number(parts[2]);
 
-  const res = await fetch(`/api/orders/${orderId}`, {
+  const res = await fetch(`/api/orders/item/${itemId}`, {
     credentials: "include",
   });
 
@@ -28,15 +28,10 @@ async function loadOrder() {
     return;
   }
 
-  const order = await res.json();
-  const item = order.items.find(i => i.item_id === itemId);
+    const data = await res.json();
+    const item = data.item;
 
-  if (!item) {
-    alert("Item not found");
-    return;
-  }
-
- 
+     
   document.getElementById("order-text").innerHTML = `
     <h4>${item.title}</h4>
     <p>Price: ₹${item.price}</p>
@@ -47,8 +42,19 @@ async function loadOrder() {
 
 
   document.getElementById("order-thumb").innerHTML = `
-    <a href = "/products/${item.product_id}"><img src="${item.thumbnail}" alt="${item.title}"></a>
+    <a href = "/products/${item.product_id}"><img src="${item.thumbnail}" alt="${item.title}" loading="lazy">
+</a>
   `;
+
+    const order = data.order;
+    const payment = data.payment;
+
+  if (!item) {
+    alert("Item not found");
+    return;
+  }
+
+
 
 
 const statusClass = item.status.toLowerCase();
@@ -89,15 +95,15 @@ if (item.status === "CANCELLED") {
   `;
 
 
-  document.getElementById("payment-box").innerHTML = order.payment
+  document.getElementById("payment-box").innerHTML = payment
     ? `
       <div class="price-row">
         <span>Payment Method</span>
-        <span>${order.payment.method}</span>
+        <span>${payment.method}</span>
       </div>
       <div class="price-row">
         <span>Status</span>
-        <span>${order.payment.status}</span>
+        <span>${payment.status}</span>
       </div>
       <div class="price-row total">
         <span>Total Paid</span>

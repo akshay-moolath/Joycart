@@ -90,6 +90,73 @@ def get_single_order(request: Request,
 
     return data
 
+
+@router.get("/item/{item_id}")
+def get_single_order_item(
+    item_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    row = (
+        db.query(OrderItems, Order, Product)
+        .join(Order, Order.id == OrderItems.order_id)
+        .join(Product, Product.id == OrderItems.product_id)
+        .filter(
+            OrderItems.id == item_id,
+            Order.user_id == current_user.id
+        )
+        .first()
+    )
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Order item not found")
+
+    oi, order, product = row
+
+    refund_status = (
+        db.query(Refund.status)
+        .filter(Refund.orderitem_id == oi.id)
+        .order_by(Refund.created_at.desc())
+        .scalar()
+    )
+
+    payment = (
+        db.query(Payment)
+        .filter(Payment.order_id == order.id)
+        .order_by(Payment.created_at.desc())
+        .first()
+    )
+
+    return {
+        "item": {
+            "item_id": oi.id,
+            "order_id": order.id,
+            "product_id": product.id,
+            "title": product.title,
+            "price": oi.price_at_purchase,
+            "quantity": oi.quantity,
+            "status": oi.status,
+            "refund_status": refund_status,
+            "subtotal": f"{oi.price_at_purchase * oi.quantity:.2f}",
+            "thumbnail": product.thumbnail,
+        },
+        "order": {
+            "status": order.status,
+            "created_at": order.created_at,
+            "shipping_address": order.shipping_address,
+        },
+        "payment": (
+            {
+                "method": payment.method,
+                "status": payment.status,
+                "gateway_id": payment.gateway_payment_id,
+            }
+            if payment
+            else None
+        ),
+    }
+
+
 @pages_router.get("/orders")
 def get_all_order_items(
     request: Request,
