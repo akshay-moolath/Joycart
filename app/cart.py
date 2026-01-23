@@ -62,7 +62,6 @@ def add_to_cart(request:Request,
 
     return cart
 
-# cart.py
 
 @router.get("/view")
 def get_cart(
@@ -159,15 +158,26 @@ def viewcart(request: Request,
 
 @pages_router.get("/cart/count")
 def cart_count(
-    current_user = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    cart = db.query(User).filter(User.id == current_user.id).first()
+
+    cart = (
+        db.query(Cart)
+        .filter(Cart.user_id == current_user.id)
+        .first()
+    )
+
+
+    if not cart:
+        return {"count": 0}
+
     count = (
         db.query(CartItem)
-        .filter(CartItem.cart_id== cart.id)
+        .filter(CartItem.cart_id == cart.id)
         .count()
     )
+
     return {"count": count}
 
 
