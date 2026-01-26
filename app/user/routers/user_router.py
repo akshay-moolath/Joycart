@@ -1,12 +1,11 @@
-# app/crud/user.py
-from fastapi import APIRouter, Depends, HTTPException,Form,Request
+from fastapi import APIRouter, Depends,Form,Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from fastapi.templating import Jinja2Templates
-from app.auth import hash_password, verify_password, create_access_token,get_current_user
-from app.db.models import User, Address,Seller
-from app.redis import get_all_products_cached
+from app.auth import get_current_user,create_access_token
+from app.db.models import User
+from app.user.services.user_services import create_user,authenticate_user,home,profile,update_profile,add_address,edit_address,delete_address
 
 
 router = APIRouter()
@@ -17,32 +16,13 @@ templates = Jinja2Templates(directory="templates")
 ###############################REGISTER#########################################
 
 @router.post("/register")
-def create_user(
+def create_user_endpoint(
     username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    if db.query(User).filter(User.username == username).first():
-        raise HTTPException(status_code=400, detail="username already exists")
-    if db.query(User).filter(User.email == email).first():
-        raise HTTPException(status_code=400, detail="email already exists")
-
-    user = User(
-        username=username,
-        email=email,
-        password=hash_password(password)
-    )
-
-        
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    if user.id == 1:
-        user.role = "admin"
-
-    db.commit()
+    create_user(username,email,password,db)
 
     return RedirectResponse("/login", status_code=302)
 
@@ -63,15 +43,14 @@ def register(request: Request):
 ############################LOGIN AND LOGOUT#################################
 
 @router.post("/login")
-def login_user( username: str = Form(...),
-    password: str = Form(...), 
-    db: Session = Depends(get_db)):
+def login_user_endpoint(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = authenticate_user(username, password, db)
 
-    user = db.query(User).filter(
-        User.username == username
-    ).first()
-
-    if not user or not verify_password(password, user.password):
+    if not user:
         return RedirectResponse(
             "/login?error=1",
             status_code=302
@@ -83,18 +62,19 @@ def login_user( username: str = Form(...),
         "/home",
         status_code=302
     )
-    response.delete_cookie("access_token")
+
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
         max_age=60 * 60 * 24,
-        samesite="none",
+        samesite="lax",
         secure=True,
-        path="/"  
+        path="/"
     )
 
     return response
+
 
 @pages_router.get('/login')
 def login(request: Request):
@@ -119,25 +99,12 @@ def logout():
 
 
 @pages_router.get("/home", dependencies=[Depends(get_current_user)])
-def home(
+def home_endpoint(
     request: Request,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    products = get_all_products_cached(db)  #use (products = list_products(db)) in case of db
-
-    if current_user.is_seller:
-        seller = (
-            db.query(Seller)
-            .filter(Seller.user_id == current_user.id)
-            .first()
-        )
-
-        if seller:
-            products = [
-                p for p in products
-                if p["seller_id"] != seller.id    # use (if p.seller_id != seller.id) in case of db .
-            ]
+    products = home(current_user,db)
 
     return templates.TemplateResponse(
         "home.html",
@@ -151,7 +118,7 @@ def home(
 
 
 @pages_router.get("/profile")
-def profile(
+def profile_endpoint(
     request: Request,
     section: str | None = None,
     add: bool = False,
@@ -159,25 +126,7 @@ def profile(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    addresses = []
-    address_to_edit = None
-
-    if section == "address":
-        addresses = (
-            db.query(Address)
-            .filter(Address.user_id == current_user.id)
-            .all()
-        )
-
-        if edit:
-            address_to_edit = (
-                db.query(Address)
-                .filter(
-                    Address.id == edit,
-                    Address.user_id == current_user.id
-                )
-                .first()
-            )
+    (addresses,address_to_edit) = profile(section,edit,current_user,db)
 
     return templates.TemplateResponse(
         "profile.html",
@@ -194,29 +143,13 @@ def profile(
         }
     )
 @router.post("/profile/update")
-def update_profile(
+def update_profile_endpoint(
     username: str = Form(None),
     email: str = Form(None),
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == current_user.id).first()
-
-    
-    if username and username != user.username:
-        existing_user = db.query(User).filter(User.username == username).first()
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Username already taken")
-        user.username = username
-
-    
-    if email and email != user.email:
-        existing_email = db.query(User).filter(User.email == email).first()
-        if existing_email:
-            raise HTTPException(status_code=400, detail="Email already in use")
-        user.email = email
-
-    db.commit()
+    update_profile(username,email,current_user,db)
 
     return RedirectResponse(
         url="/profile",
@@ -229,7 +162,7 @@ def update_profile(
 ################################ ADD,DELETE AND EDIT ADDRESS#############################
 
 @router.post("/address/add")
-def add_address(
+def add_address_endpoint(
     current_user: User = Depends(get_current_user),
     name: str = Form(...),
     phone: str = Form(...),
@@ -243,27 +176,7 @@ def add_address(
     db: Session = Depends(get_db)
     
 ):
-    
-    if is_default:
-        db.query(Address).filter(
-            Address.user_id == current_user.id,
-            Address.is_default == True
-        ).update({"is_default": False})
-
-    address = Address(
-        user_id=current_user.id,
-        name=name,
-        phone=phone,
-        address_line1=address_line1,
-        address_line2=address_line2,
-        city=city,
-        state=state,
-        pincode=pincode,
-        is_default=is_default
-    )
-
-    db.add(address)
-    db.commit()
+    add_address(current_user,name,phone,address_line1,address_line2,city,state,pincode,is_default,db)
 
     return RedirectResponse(redirect_to or
         "/profile?section=address",
@@ -283,7 +196,7 @@ def add_address(request: Request,
 
 
 @router.post("/address/edit/{address_id}")
-def edit_address(
+def edit_address_endpoint(
     address_id: int,
     name: str = Form(...),
     phone: str = Form(...),
@@ -295,51 +208,18 @@ def edit_address(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    address = db.query(Address).filter(
-        Address.id == address_id,
-        Address.user_id == current_user.id
-    ).first()
-
-    address.name = name
-    address.city = city
-    address.phone = phone
-    address.address_line1 = address_line1
-    address.address_line2 = address_line2
-    address.city = city
-    address.state = state
-    address.pincode = pincode
-    
-    db.commit()
+    edit_address(address_id,name,phone,city,state,address_line1,address_line2,pincode,current_user,db)
 
     return RedirectResponse("/profile?section=address", status_code=302)
 
 
 @router.post("/address/delete/{address_id}")
-def delete_address(
+def delete_address_endpoint(
     address_id: int,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    address_count = db.query(Address).filter(
-        Address.user_id == current_user.id
-    ).count()
-
-    if address_count <= 1:
-        raise HTTPException(
-            status_code=400,
-            detail="You must have at least one address"
-        )
-
-    address = db.query(Address).filter(
-        Address.id == address_id,
-        Address.user_id == current_user.id
-    ).first()
-
-    if not address:
-        raise HTTPException(status_code=404)
-
-    db.delete(address)
-    db.commit()
+    delete_address(address_id,current_user,db)
 
     return RedirectResponse(
         "/profile?section=address",

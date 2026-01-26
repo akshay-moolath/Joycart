@@ -6,8 +6,8 @@ from fastapi.templating import Jinja2Templates
 from app.auth import get_current_user
 from app.db.db import Base, engine,get_db
 from app.redis import get_all_products_cached
-from app.user import router as user_router
-from app.user import pages_router as user_pages_router
+from app.user.routers.user_router import router as user_router
+from app.user.routers.user_router import pages_router as user_pages_router
 from app.seller.routers.seller_router import router as seller_router
 from app.seller.routers.seller_router import pages_router as seller_pages_router
 from app.cloudinary import router as cloudinary_router
