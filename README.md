@@ -1,143 +1,265 @@
-# 🛒 JoyCart – Full-Stack E-commerce Backend (FastAPI)
+# 🛒 JoyCart – Full‑Stack E‑commerce Backend (FastAPI)
 
-JoyCart is a **backend-first e-commerce application** built with **FastAPI**, focusing on real-world order flows, payments, refunds, seller operations, and webhook-driven state management.
-
-This project was built to **learn and demonstrate production-style backend design**, especially around **payments, refunds, and transactional safety**.
+JoyCart is a **production‑style e‑commerce backend** built using **FastAPI**, designed to demonstrate real‑world backend engineering practices such as authentication, role‑based access, order lifecycle management, payment & refund handling, seller workflows, and admin controls.
 
 ---
 
-## 🧱 Architecture Overview
+## 🚀 Live Deployment
 
-JoyCart follows a **layered backend architecture**:
+**URL:** [https://joycart.onrender.com]
 
-- **API Layer** – FastAPI routers (users, sellers, cart, checkout, orders)
-- **Business Logic Layer** – order creation, stock handling, refunds
-- **Persistence Layer** – SQLAlchemy ORM with PostgreSQL / SQLite
-- **External Services**
-  - Razorpay (payments & refunds)
-  - Cloudinary (image storage)
+The application is deployed on Render and uses:
 
-The system is designed to be **state-driven**, meaning:
-> UI never guesses payment/refund status — everything is read from the database.
+* PostgreSQL (production DB)
+* Redis (caching)
+* Razorpay (test mode) for online payments
 
 ---
 
-## 🔐 Authentication & Roles
+## 🧠 Project Goals
 
-### 👤 Users
-- JWT-based authentication
-- Can:
-  - Browse products
-  - Add to cart
-  - Checkout
-  - Cancel individual order items
-  - View order & refund status
-
-### 🧑‍💼 Sellers
-- Separate seller authentication
-- Can:
-  - Create / edit / delete products
-  - Upload images (thumbnail + gallery)
-  - Manage stock
-  - Update order item status (confirm, ship, deliver, cancel)
+* Build a **realistic e‑commerce backend**
+* Practice **clean architecture** (routers vs services)
+* Handle **payments and refunds safely**
+* Implement **role‑based systems** (user, seller, admin)
+* Learn **scalability & quality tooling** (Redis, pylint, static analysis)
 
 ---
 
-## 🛍️ Product Management
+## 🧩 Core Architecture
 
-- Products belong to a seller
-- Fields include:
-  - Price & discount
-  - Stock quantity
-  - Availability status
-  - Dimensions stored as JSON
-- Images handled via **Cloudinary**
-- Product edits support **partial updates**
-- Seller ownership is strictly enforced
+```
+app/
+├── routers/        # HTTP layer (FastAPI routes)
+├── services/       # Business logic layer
+├── models/         # SQLAlchemy ORM models
+├── auth/           # Authentication & authorization
+├── templates/      # Jinja2 templates (server-rendered UI)
+├── static/         # CSS / JS
+          
+```
 
----
+### Architectural Principles
 
-## 🛒 Cart & Checkout Flow
-
-1. User adds items to cart
-2. Cart validates stock
-3. Checkout session is created with expiry
-4. Razorpay order is generated
-5. Payment is completed asynchronously
-6. Order is created only after payment confirmation
-
-Duplicate order creation is prevented using:
-- checkout ownership checks
-- idempotent order creation logic
+* **Routers are thin** → only HTTP concerns
+* **Services contain business logic** → reusable & testable
+* **State transitions are explicit** (orders, payments, refunds)
+* **No trust in frontend** → server always validates
 
 ---
 
-## 💳 Payments (Razorpay)
+## 👥 User Roles
 
-- Razorpay Orders API used for payment initiation
-- Payments are confirmed **only via webhook**
-- Signature verification using HMAC SHA256
-- Payment status stored in DB (`SUCCESS`, `FAILED`, etc.)
+### 👤 Normal User
 
-The backend **never trusts frontend payment success**.
+* Register & login (JWT via HTTP‑only cookies)
+* Browse products
+* Manage cart
+* Place orders (COD / Online)
+* Track orders
+* Cancel eligible items
+* Write reviews (only after delivery)
 
----
+### 🏪 Seller
 
-## 🔄 Refund System (Key Feature)
+* Register as seller
+* Add / edit products
+* Manage inventory
+* View seller‑specific orders
+* Confirm / ship orders
+* Cancel orders (with correct refund logic)
 
-Refunds are implemented in a **production-correct, webhook-based way**.
+### 🛡️ Admin
 
-### Refund Design Principles
-- Refunds are **asynchronous**
-- Database state is committed **before** calling Razorpay
-- Refund success is **never assumed**
-- Final status is updated **only via webhook**
-
-### Refund Flow
-
-1. User/Seller cancels an order item
-2. Item status → `CANCELLED`
-3. Stock is restored
-4. Refund record created (`INITIATED`)
-5. Razorpay refund API is called
-6. Razorpay sends webhook:
-   - `refund.processed` → status becomes `REFUNDED`
-   - `refund.failed` → status becomes `FAILED`
-
-Refunds are **item-level**, allowing partial refunds per order.
+* View all users
+* Block / unblock users
+* Promote user to admin
+* Access admin dashboard
 
 ---
 
-## 📡 Webhooks
+## 🔐 Authentication & Security
 
-### Supported Razorpay Events
-- `payment.captured`
-- `refund.processed`
-- `refund.failed`
+* JWT‑based authentication
+* Stored in **HTTP‑only cookies** (XSS safe)
+* Role‑based dependency checks:
 
-### Security
-- All webhooks verified using Razorpay webhook secret
-- Invalid signatures are ignored
-- Webhooks are idempotent and safe to retry
-
----
-
-## 🧠 Transaction & Error Handling
-
-- External API calls happen **after DB commit**
-- Database consistency is preserved even if Razorpay fails
-- Refund retries are safe
-- Duplicate cancellations are prevented
-- Seller and user flows share the same refund logic
+  * `get_current_user`
+  * `get_current_seller`
+  * `get_current_admin`
+* Server‑side authorization for **every sensitive action**
 
 ---
 
-## ☁️ Deployment & Environment
+## 🛍️ Product & Cart System
 
-### Local Development
-- SQLite database
-- Razorpay TEST mode
-- **ngrok required** for webhook testing
+### Products
 
-```bash
-ngrok http 8000
+* Seller‑owned products
+* SKU uniqueness per product
+* Cannot delete product if it exists in any **active order**
+* Stock validation at checkout time
+
+### Cart
+
+* One cart per user
+* Add / update / remove items
+* Quantity validation
+* Cart total calculation on server
+* Redis‑assisted caching for product listing
+
+---
+
+## 💳 Checkout & Payments
+
+### Checkout Modes
+
+* **Cart checkout**
+* **Buy Now checkout**
+
+### Payment Methods
+
+* **Cash on Delivery (COD)**
+* **Online Payment (Razorpay – Test Mode)**
+
+### Payment Design Principles
+
+* Amount always calculated on server
+* Frontend never sends final price
+* One checkout → one payment order
+* Idempotent handling to avoid duplicates
+
+---
+
+## 🔄 Order Lifecycle
+
+### Order Item Status Flow
+
+```
+PLACED → CONFIRMED → SHIPPED → DELIVERED
+            ↘
+           CANCELLED
+```
+
+* User can cancel before shipment
+* Seller can cancel before shipment
+* Stock is restored correctly on cancellation
+
+### Order States
+
+* FULL order & per‑item tracking
+* Partial cancellations supported
+
+---
+
+## 💸 Refund System (Important Feature)
+
+### Refund States
+
+```
+INITIATED → PROCESSING → REFUNDED / FAILED
+```
+
+### Refund Logic
+
+* **COD orders** → no refund, payment marked `NOT_REQUIRED`
+* **Online payments** → Razorpay refund API used
+* Refunds created server‑side
+* Razorpay **webhooks** used to finalize refund status
+* Idempotency checks prevent duplicate refunds
+
+This is one of the **strongest parts of the project** and mirrors real‑world e‑commerce behavior.
+
+---
+
+## 🔔 Razorpay Webhooks
+
+Handled events:
+
+* `payment.captured`
+* `refund.processed`
+* `refund.failed`
+
+Webhook safety:
+
+* HMAC signature verification
+* Early rejection of invalid payloads
+* Idempotent order/refund processing
+
+---
+
+## ⭐ Reviews System
+
+* Only users with **DELIVERED orders** can review
+* One review per user per product
+* Rating validation (1–5)
+* Average rating calculation
+* Review timestamps handled safely
+
+---
+
+## ⚙️ Performance & Scalability Awareness
+
+While not designed for massive scale, the project includes **scalability‑aware decisions**:
+
+* Redis caching for product listings
+* Avoidance of N+1 queries (joins used)
+* Explicit DB transactions
+* Background‑safe payment flows
+* Stateless application design
+
+---
+
+## 🧪 Testing & Quality
+
+### Manual & Integration Testing
+
+* End‑to‑end testing of user, seller, admin flows
+* Razorpay test mode used for payments & refunds
+* Webhook testing via Razorpay dashboard
+
+### Static Code Analysis
+
+* **pylint score: 8.9+/10**
+* Focused on fixing **real issues**, not cosmetic warnings
+* Unsafe exception handling fixed
+* Duplicate logic refactored
+
+---
+
+## 📦 Tech Stack
+
+* **Backend:** FastAPI, Python
+* **ORM:** SQLAlchemy
+* **Database:** PostgreSQL,Sqlite
+* **Cache:** Redis
+* **Templates:** Jinja2
+* **Payments:** Razorpay (Test Mode)
+* **Auth:** JWT
+* **Deployment:** Render
+
+---
+
+## 📈 What This Project Demonstrates
+
+* Understanding of backend architecture
+* Real payment & refund handling
+* State‑driven design
+* Secure authentication
+* Role‑based systems
+* Practical error handling
+* Code quality awareness
+
+This project was built to **learn and demonstrate backend engineering**, not just to "make it work".
+
+---
+
+## 🙌 Final Notes
+
+JoyCart is an evolving project. Future improvements could include:
+
+* Automated tests
+* Async task queue for refunds
+* Better admin analytics
+
+**Built with focus, patience, and a lot of debugging.**
