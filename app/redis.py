@@ -4,6 +4,7 @@ from app.db.models import Product
 from app.product import list_products
 
 REDIS_URL = os.getenv("REDIS_URL")
+CACHE_KEY = os.getenv("CACHE_KEY")
 
 redis_client = redis.Redis.from_url(
     REDIS_URL,
@@ -31,16 +32,14 @@ def product_to_dict(product):
     }
 
 
-CACHE_KEY = os.getenv("CACHE_KEY")
-
 def get_all_products_cached(db: Session):
     cached_products = get_cache(CACHE_KEY)
 
     if cached_products:
-        print("⚡ Loaded products from Redis")
+        print("Loaded products from REDIS")
         return cached_products
 
-    print("🐢 Loaded products from DB")
+    print(" Loaded products from DB")
     products = list_products(db)
     products_data = [product_to_dict(p) for p in products]
 

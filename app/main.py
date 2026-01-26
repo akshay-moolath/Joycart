@@ -8,8 +8,8 @@ from app.db.db import Base, engine,get_db
 from app.redis import get_all_products_cached
 from app.user import router as user_router
 from app.user import pages_router as user_pages_router
-from app.seller import router as seller_router
-from app.seller import pages_router as seller_pages_router
+from app.seller.routers.seller_router import router as seller_router
+from app.seller.routers.seller_router import pages_router as seller_pages_router
 from app.cloudinary import router as cloudinary_router
 from app.cart.routers.cart_router import router as cart_router
 from app.cart.routers.cart_router import pages_router as cart_pages_router
