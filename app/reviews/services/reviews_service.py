@@ -1,25 +1,14 @@
-from fastapi import APIRouter,Form,Depends, HTTPException
-from sqlalchemy.orm import Session
-from fastapi.templating import Jinja2Templates
-from app.auth import get_current_user
-from app.db.models import User,Review,OrderItems,Order
-from app.db.db import get_db
+from app.db.models import Review, Order,OrderItems,User, Product
+from fastapi import HTTPException
+from sqlalchemy import func
 
-router = APIRouter()
-pages_router = APIRouter()
+def add_review(product_id,rating,comment,current_user,db):
 
-templates = Jinja2Templates(directory="templates")
+    product = db.query(Product).filter(Product.id == product_id).first()
 
+    if not product:
+        raise HTTPException(404, "Product not found")
 
-
-@router.post("/reviews/add")
-def add_review(
-    product_id: int = Form(...),
-    rating: int = Form(...),
-    comment: str = Form(None),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
     if rating < 1 or rating > 5:
         raise HTTPException(400, "Rating must be between 1 and 5")
 
@@ -59,12 +48,8 @@ def add_review(
 
     return {"message": "Review added"}
 
+def load_reviews(product_id,db):
 
-@router.get("/reviews/load")
-def load_reviews(
-    product_id: int,
-    db: Session = Depends(get_db)
-):
     reviews = (
         db.query(Review, User.username)
         .join(User, User.id == Review.user_id)
@@ -77,17 +62,14 @@ def load_reviews(
             "username": username,
             "rating": review.rating,
             "comment": review.comment,
-            "created_at": review.created_at
+            "created_at": review.created_at.isoformat()
+
         }
         for review, username in reviews
     ]
 
-
-@router.get("/reviews/calculate")
-def calculate_rating(
-    product_id: int,
-    db: Session = Depends(get_db)
-):
+def rating_calculation(product_id,db):
+    
     reviews = db.query(Review).filter(
         Review.product_id == product_id
     ).all()
@@ -98,10 +80,14 @@ def calculate_rating(
             "total_reviews": 0
         }
 
-    total_rating = sum(r.rating for r in reviews)
-    average_rating = round(total_rating / len(reviews), 1)
+    avg, count = db.query(
+        func.avg(Review.rating),
+        func.count(Review.id)
+    ).filter(
+        Review.product_id == product_id
+    ).first()
 
     return {
-        "average_rating": average_rating,
-        "total_reviews": len(reviews)
+        "average_rating": avg,
+        "total_reviews": count
     }
