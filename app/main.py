@@ -11,8 +11,8 @@ from app.user import pages_router as user_pages_router
 from app.seller import router as seller_router
 from app.seller import pages_router as seller_pages_router
 from app.cloudinary import router as cloudinary_router
-from app.cart import router as cart_router
-from app.cart import pages_router as cart_pages_router
+from app.cart.routers.cart_router import router as cart_router
+from app.cart.routers.cart_router import pages_router as cart_pages_router
 from app.product import router as product_router
 from app.checkout.routers.checkout_router import router as checkout_router
 from app.checkout.routers.checkout_router import pages_router as checkout_pages_router
@@ -23,7 +23,7 @@ from app.orders import router as order_router
 from app.orders import pages_router as order_pages_router
 from app.reviews import router as review_router
 from app.reviews import pages_router as review_pages_router
-from app.admin import admin_router
+from app.admin.routers.admin_router import router as admin_router
 
 
 Base.metadata.create_all(bind = engine)

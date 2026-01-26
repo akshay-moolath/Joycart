@@ -1,35 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Request,Form
-from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
-from app.db.db import get_db
-from app.auth import get_current_user
-from app.db.models import Cart, CartItem, Product, User
+from app.db.models import Product,Cart,CartItem
+from fastapi import HTTPException
 
+def add_to_carts(product_id,quantity,current_user,db):
 
-router = APIRouter()
-pages_router = APIRouter()
-
-templates = Jinja2Templates(directory="templates")
-
-@router.post("/add")
-def add_to_cart(request:Request,
-    product_id: int = Form(...),
-    quantity: int = Form(...),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    
+        
     if product.seller_id == current_user.seller_id:
         raise HTTPException(
-            status_code=400,
-            detail="You cannot buy your own product"
-        )
+                status_code=400,
+                detail="You cannot buy your own product"
+            )
 
-    
+        
     cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
     if not cart:
         cart = Cart(user_id=current_user.id)
@@ -37,7 +21,7 @@ def add_to_cart(request:Request,
         db.commit()
         db.refresh(cart)
 
-    
+        
     item = (
         db.query(CartItem)
         .filter(
@@ -51,10 +35,10 @@ def add_to_cart(request:Request,
         item.quantity += quantity
     else:
         item = CartItem(
-            cart_id=cart.id,
-            product_id=product_id,
-            quantity=quantity
-        )
+                cart_id=cart.id,
+                product_id=product_id,
+                quantity=quantity
+            )
         db.add(item)
 
     db.commit()
@@ -62,13 +46,8 @@ def add_to_cart(request:Request,
 
     return cart
 
+def get_carts(current_user,db):
 
-@router.get("/view")
-def get_cart(
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
     cart = (
         db.query(Cart)
         .filter(Cart.user_id == current_user.id)
@@ -108,16 +87,8 @@ def get_cart(
         "total": total
     }
 
+def update_quantity(item_id,quantity,current_user,db):
 
-@router.patch("/item/{item_id}")
-def update_quantity(request: Request,
-    item_id: int,
-    quantity: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    
-):
-    
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -127,16 +98,8 @@ def update_quantity(request: Request,
 
     return {"message": "Quantity updated"}
 
+def delete_quantity(item_id,current_user,db):
 
-
-@router.delete("/item/{item_id}")
-def delete_quantity(request: Request,
-    item_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    
-):
-    
     item = (db.query(CartItem).join(Cart).filter(CartItem.id == item_id,Cart.user_id == current_user.id).first())
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -145,23 +108,7 @@ def delete_quantity(request: Request,
 
     return {"message": "Item removed"}
 
-@pages_router.get("/cart")
-def viewcart(request: Request,
-             current_user: User = Depends(get_current_user)):   
-    return templates.TemplateResponse(
-        "viewcart.html",
-        {"request":request,
-         "current_user":current_user}
-    )
-
-
-
-@pages_router.get("/cart/count")
-def cart_count(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-
+def cart_count(current_user,db):
     cart = (
         db.query(Cart)
         .filter(Cart.user_id == current_user.id)
@@ -180,13 +127,7 @@ def cart_count(
 
     return {"count": count}
 
-
-@pages_router.get("/cart/exist/{product_id}")
-def is_in_cart(
-    product_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def is_in_cart(product_id,current_user,db):
     cart = (
         db.query(Cart)
         .filter(Cart.user_id == current_user.id)
@@ -207,3 +148,4 @@ def is_in_cart(
     )
 
     return {"in_cart": exists}
+

@@ -1,24 +1,8 @@
-from fastapi import APIRouter,  HTTPException, Depends, Request
-import os
-from sqlalchemy.orm import Session
-from app.db.db import get_db
 from app.db.models import User
-from app.auth import get_current_admin
-from fastapi.templating import Jinja2Templates
+from fastapi import HTTPException
 
-templates = Jinja2Templates(directory="templates")
+def get_users(db):
 
-admin_router = APIRouter(prefix="/admin")
-
-ADMIN_KEY = os.getenv("ADMIN_KEY")
-
-
-
-@admin_router.get("/users")
-def list_users(
-    db: Session = Depends(get_db),
-    admin = Depends(get_current_admin)
-):
     users = db.query(User).all()
 
     return [
@@ -32,13 +16,8 @@ def list_users(
         for u in users
     ]
 
+def block_users(user_id,db,admin):
 
-@admin_router.put("/users/{user_id}/block")
-def block_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    admin = Depends(get_current_admin)
-):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -59,12 +38,7 @@ def block_user(
     return {"message": f"User {user_id} blocked"}
 
 
-@admin_router.put("/users/{user_id}/unblock")
-def unblock_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    admin = Depends(get_current_admin)
-):
+def unblock_users(user_id,db,admin):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -85,12 +59,8 @@ def unblock_user(
     return {"message": f"User {user_id} unblocked"}
 
 
-@admin_router.put("/users/{user_id}/make-admin")
-def make_user_admin(
-    user_id: int,
-    db: Session = Depends(get_db),
-    admin = Depends(get_current_admin)
-):
+def make_admin(user_id,db,admin):
+
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -116,14 +86,3 @@ def make_user_admin(
     return {
         "message": f"User {user_id} promoted to admin"
     }
-
-@admin_router.get("/dashboard")
-def admin_dashboard(request:Request,
-        current_admin = Depends(get_current_admin)):
-    return templates.TemplateResponse(
-        "admin.html",
-        {
-            "request": request,
-            "current_user": current_admin
-        }
-    )

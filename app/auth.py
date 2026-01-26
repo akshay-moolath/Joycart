@@ -8,10 +8,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.models import User, Seller
-from dotenv import load_dotenv
 
 
-load_dotenv()
 JWT_SECRET=os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 
