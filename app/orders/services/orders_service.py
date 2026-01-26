@@ -230,7 +230,7 @@ def create_refund_record(item,payment,db):
     db.add(refund)
     return refund
 
-def initiate_razorpay_refund(refund):
+def initiate_razorpay_refund(refund,db):
     if not refund:
         return
 
@@ -250,6 +250,8 @@ def initiate_razorpay_refund(refund):
 
         refund.gateway_refund_id = razorpay_refund["id"]
         refund.status = "PROCESSING"
+
+        db.commit()
 
     except Exception as e:
         refund.status = "FAILED"

@@ -281,7 +281,7 @@ def order_item_action(item_id,action,seller,db):
         db.commit()  
 
         if refund:
-            initiate_razorpay_refund(refund)  
+            initiate_razorpay_refund(refund,db)  
 
         return RedirectResponse("/seller/orders", status_code=302)
 
