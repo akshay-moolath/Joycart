@@ -336,12 +336,25 @@ def place_order(current_user, db, checkout_id, method, razorpay_payment_id):
 
         db.delete(checkout)
 
-        if checkout.mode == "CART":
-            cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
-            if cart:
+        cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+
+        if cart:
+            if checkout.mode == "CART":
+                
                 db.query(CartItem).filter(CartItem.cart_id == cart.id).delete(
                     synchronize_session=False
                 )
+
+            elif checkout.mode == "BUY_NOW":
+                
+                purchased_product_ids = [
+                    item.product_id for item in checkout_items
+                ]
+
+                db.query(CartItem).filter(
+                    CartItem.cart_id == cart.id,
+                    CartItem.product_id.in_(purchased_product_ids),
+                ).delete(synchronize_session=False)
 
         db.commit()
 
