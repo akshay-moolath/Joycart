@@ -44,6 +44,8 @@ def add_review(product_id, rating, comment, current_user, db):
     db.add(review)
     db.commit()
 
+    update_product_rating(product_id, db)
+
     return {"message": "Review added"}
 
 
@@ -81,3 +83,18 @@ def rating_calculation(product_id, db):
     )
 
     return {"average_rating": avg, "total_reviews": count}
+
+def update_product_rating(product_id, db):
+    avg_rating, count = (
+        db.query(func.avg(Review.rating), func.count(Review.id))
+        .filter(Review.product_id == product_id)
+        .first()
+    )
+
+    product = db.query(Product).filter(Product.id == product_id).first()
+
+    if product:
+        product.rating = round(avg_rating or 0, 1)
+        product.rating_count = count
+
+        db.commit()

@@ -56,7 +56,7 @@ app.include_router(
 )
 app.include_router(order_pages_router, dependencies=[Depends(get_current_user)])
 app.include_router(
-    review_router, prefix="/api", dependencies=[Depends(get_current_user)]
+    review_router, prefix="/api"
 )
 app.include_router(review_pages_router, dependencies=[Depends(get_current_user)])
 app.include_router(admin_router)
