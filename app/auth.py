@@ -13,6 +13,12 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET is not set")
+
+if not ALGORITHM:
+    raise RuntimeError("ALGORITHM is not set")
+
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 bearer = HTTPBearer()
 
@@ -73,7 +79,7 @@ def get_current_user_optional(
 ) -> Optional[User]:
     try:
         return get_current_user(request=request, db=db)
-    except:
+    except HTTPException:
         return None
 
 

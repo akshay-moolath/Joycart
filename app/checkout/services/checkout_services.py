@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from app.db.models import (
     Checkout,
     CheckoutItem,
@@ -22,6 +23,7 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+logger = logging.getLogger(__name__)
 
 
 def cart_checkout(db: Session, current_user):
@@ -359,7 +361,7 @@ def place_order(current_user, db, checkout_id, method, razorpay_payment_id):
 
         db.commit()
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        print("❌ ORDER / PAYMENT FAILED:", str(e))
+        logger.exception("Order/payment flow failed", extra={"checkout_id": checkout_id, "user_id": current_user.id})
         raise
